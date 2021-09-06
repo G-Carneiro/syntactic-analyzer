@@ -6,7 +6,7 @@ class NonContextGrammar:
         self._non_terminals: Set[str] = set()
         self._terminals: Set[str] = set()
         # transition = (non_terminal, sequence of symbols)
-        self._transitions: Set[Tuple[str, List[str]]] = set()
+        self._transitions: Set[Tuple[str, Tuple[str]]] = set()
         self._set_grammar(grammar_input)
 
     def _set_grammar(self, grammar_input: str) -> None:
@@ -16,7 +16,7 @@ class NonContextGrammar:
             non_terminal: str = sequence[0]
             del sequence[:2]
             self._non_terminals.add(non_terminal)
-            transition = (non_terminal, sequence)
+            transition = (non_terminal, tuple(sequence))
             self._transitions.add(transition)
             for symbol in sequence:
                 symbols.add(symbol)
@@ -25,6 +25,11 @@ class NonContextGrammar:
 
         return None
 
+    def get_terminals(self) -> Set[str]:
+        return self._terminals
 
+    def get_non_terminals(self) -> Set[str]:
+        return self._non_terminals
 
-
+    def get_transitions(self) -> Set[Tuple[str, Tuple[str]]]:
+        return self._transitions
