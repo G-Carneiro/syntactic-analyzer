@@ -33,3 +33,12 @@ class NonContextGrammar:
 
     def get_transitions(self) -> Set[Tuple[str, Tuple[str]]]:
         return self._transitions
+
+    def _eliminate_left_recursion(self) -> None:
+        non_terminals: List[str] = list(self._non_terminals)
+        for i in range(len(non_terminals)):
+            for j in range(i - 1):
+                for transition in self._transitions:
+                    if (non_terminals[i] == transition[0]) \
+                            and (non_terminals[j] == transition[1][0]):
+                        pass
