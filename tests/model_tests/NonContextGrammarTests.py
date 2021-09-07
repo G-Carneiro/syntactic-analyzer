@@ -48,5 +48,5 @@ class NonContextGrammarTests(unittest.TestCase):
 
         grammar = NonContextGrammar(grammar_input)
         grammar._eliminate_left_recursion()
-        print(grammar.get_transitions())
+        print(grammar)
 

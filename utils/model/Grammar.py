@@ -1,4 +1,5 @@
 from typing import Set, List, Tuple
+from copy import copy
 
 
 class NonContextGrammar:
@@ -38,19 +39,44 @@ class NonContextGrammar:
         non_terminals: List[str] = list(self._non_terminals)
         for i in range(len(non_terminals)):
             for j in range(i - 1):
-                for transition in self._transitions:
+                transitions = copy(self._transitions)
+                for transition in transitions:
                     if (non_terminals[i] == transition[0]) \
                             and (non_terminals[j] == transition[1][0]):
                         self._transitions.remove(transition)
                         alpha = list(transition[1][1:])
                         productions = self.get_all_productions_of_state(non_terminals[j])
                         for production in productions:
-                            self._transitions.add((transition[i], tuple(list(production) + alpha)))
+                            self._transitions.add((non_terminals[i], tuple(list(production) + alpha)))
+
+            self._eliminate_immediate_left_recursion(non_terminals[i])
 
         return None
 
-    def _eliminate_immediate_left_recursion(self) -> None:
-        pass
+    def _eliminate_immediate_left_recursion(self, state: str) -> None:
+        if self.have_immediate_left_recursion(state):
+            new_state: str = state + "\'"
+            self._non_terminals.add(new_state)
+            epsilon_production = (new_state, tuple("&"))
+            self._transitions.add(epsilon_production)
+            for transition in self._transitions:
+                if transition[0] == state:
+                    self._transitions.remove(transition)
+                    if transition[1][0] == state:
+                        new_production = (new_state, tuple(list(transition[1][1:]) + [new_state]))
+                    else:
+                        new_production = (state, tuple(list(transition[1]) + [new_state]))
+
+                    self._transitions.add(new_production)
+
+        return None
+
+    def have_immediate_left_recursion(self, state: str) -> bool:
+        for transition in self._transitions:
+            if (transition[0] == state) and (transition[1][0] == state):
+                return True
+
+        return False
 
     def get_all_productions_of_state(self, state: str) -> Set[Tuple[str]]:
         all_productions = set()
@@ -61,4 +87,8 @@ class NonContextGrammar:
         return all_productions
 
     def __repr__(self) -> str:
-        pass
+        output: str = ""
+        for state in sorted(self._non_terminals):
+            output += f"{state} -> {self.get_all_productions_of_state(state)}\n"
+
+        return output
