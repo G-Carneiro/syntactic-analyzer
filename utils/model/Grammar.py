@@ -41,4 +41,24 @@ class NonContextGrammar:
                 for transition in self._transitions:
                     if (non_terminals[i] == transition[0]) \
                             and (non_terminals[j] == transition[1][0]):
-                        pass
+                        self._transitions.remove(transition)
+                        alpha = list(transition[1][1:])
+                        productions = self.get_all_productions_of_state(non_terminals[j])
+                        for production in productions:
+                            self._transitions.add((transition[i], tuple(list(production) + alpha)))
+
+        return None
+
+    def _eliminate_immediate_left_recursion(self) -> None:
+        pass
+
+    def get_all_productions_of_state(self, state: str) -> Set[Tuple[str]]:
+        all_productions = set()
+        for transition in self._transitions:
+            if transition[0] == state:
+                all_productions.add(tuple(transition[1]))
+
+        return all_productions
+
+    def __repr__(self) -> str:
+        pass
