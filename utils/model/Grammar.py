@@ -38,8 +38,9 @@ class NonContextGrammar:
     def _eliminate_left_recursion(self) -> None:
         # FIXME: não está funcionando como deveria.
         non_terminals: List[str] = list(self._non_terminals)
+        non_terminals = ["S", "A", "B"]
         for i in range(len(non_terminals)):
-            for j in range(i - 1):
+            for j in range(i):
                 transitions = copy(self._transitions)
                 for transition in transitions:
                     if (non_terminals[i] == transition[0]) \

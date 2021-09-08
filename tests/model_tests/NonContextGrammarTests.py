@@ -1,4 +1,5 @@
 import unittest
+from copy import copy
 
 from utils.model.Grammar import NonContextGrammar
 
@@ -47,6 +48,24 @@ class NonContextGrammarTests(unittest.TestCase):
                         "B -> B b"
 
         grammar = NonContextGrammar(grammar_input)
-        grammar._eliminate_left_recursion()
-        print(grammar)
+        expected_productions = {("S", ("A", "a", "S'")),
+                                ("S", ("c", "S'")),
+                                ("S'", tuple("&")),
+                                ("S'", ("c", "S'")),
+                                ("A", ("B", "b", "A'")),
+                                ("A", ("a", "A'")),
+                                ("A", ("c", "S'", "a", "A'")),
+                                ("A'", ("a", "S'", "a", "A'")),
+                                ("A'", tuple("&")),
+                                ("B", ("c", "S'", "c", "B'")),
+                                ("B", ("a", "A'", "a", "S'", "c", "B'")),
+                                ("B", ("c", "S'", "a", "A'", "a", "S'", "c", "B'")),
+                                ("B'", ("b", "B'")),
+                                ("B'", ("b", "A'", "a", "S'", "c", "B'")),
+                                ("B'", tuple("&"))
+                                }
+        for _ in range(10000):
+            aux_grammar = copy(grammar)
+            aux_grammar._eliminate_left_recursion()
+            self.assertEqual(aux_grammar.get_transitions(), expected_productions)
 
