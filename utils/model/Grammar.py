@@ -36,6 +36,7 @@ class NonContextGrammar:
         return self._transitions
 
     def _eliminate_left_recursion(self) -> None:
+        # FIXME: não está funcionando como deveria.
         non_terminals: List[str] = list(self._non_terminals)
         for i in range(len(non_terminals)):
             for j in range(i - 1):
@@ -59,7 +60,8 @@ class NonContextGrammar:
             self._non_terminals.add(new_state)
             epsilon_production = (new_state, tuple("&"))
             self._transitions.add(epsilon_production)
-            for transition in self._transitions:
+            transitions = copy(self._transitions)
+            for transition in transitions:
                 if transition[0] == state:
                     self._transitions.remove(transition)
                     if transition[1][0] == state:
