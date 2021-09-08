@@ -64,6 +64,19 @@ class NonContextGrammarTests(unittest.TestCase):
                                 ("B'", ("b", "A'", "a", "S'", "c", "B'")),
                                 ("B'", tuple("&"))
                                 }
+        expected_productions = {("A", ("S", "a")),
+                                ("A", ("B", "b")),
+                                ("A", tuple("a")),
+                                ("B", ("S", "c", "B'")),
+                                ("B'", ("b", "B'")),
+                                ("B'", tuple("&")),
+                                ("S", ("a", "a", "S'")),
+                                ("S", ("c", "S'")),
+                                ("S'", ("c", "S'")),
+                                ("S'", ("a", "a", "S'")),
+                                ("S'", ("c", "B'", "b", "a", "S'")),
+                                ("S'", tuple("&"))
+                                }
         for _ in range(10000):
             aux_grammar = copy(grammar)
             aux_grammar._eliminate_left_recursion()

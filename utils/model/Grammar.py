@@ -36,9 +36,7 @@ class NonContextGrammar:
         return self._transitions
 
     def _eliminate_left_recursion(self) -> None:
-        # FIXME: não está funcionando como deveria.
-        non_terminals: List[str] = list(self._non_terminals)
-        non_terminals = ["S", "A", "B"]
+        non_terminals: List[str] = list(sorted(self._non_terminals))
         for i in range(len(non_terminals)):
             for j in range(i):
                 transitions = copy(self._transitions)
@@ -88,6 +86,9 @@ class NonContextGrammar:
                 all_productions.add(tuple(transition[1]))
 
         return all_productions
+
+    def _left_factoring(self) -> None:
+        return None
 
     def __repr__(self) -> str:
         output: str = ""
