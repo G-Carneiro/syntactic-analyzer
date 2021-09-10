@@ -12,6 +12,7 @@ class NonContextGrammar:
 
     def _set_grammar(self, grammar_input: str) -> None:
         symbols: Set[str] = set()
+        self._initial_symbol: str = grammar_input[0]
         for line in grammar_input.split("\n"):
             sequence: List[str] = line.split()
             non_terminal: str = sequence[0]
