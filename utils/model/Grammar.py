@@ -1,4 +1,4 @@
-from typing import Set, List, Tuple
+from typing import Set, List, Tuple, Dict
 from copy import copy
 
 
@@ -9,6 +9,8 @@ class NonContextGrammar:
         # transition = (non_terminal, sequence of symbols)
         self._transitions: Set[Tuple[str, Tuple[str]]] = set()
         self._set_grammar(grammar_input)
+        self._set_first()
+        self._set_follow()
 
     def _set_grammar(self, grammar_input: str) -> None:
         symbols: Set[str] = set()
@@ -89,6 +91,50 @@ class NonContextGrammar:
         return all_productions
 
     def _left_factoring(self) -> None:
+        return None
+
+    def _set_first(self) -> None:
+        self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
+        for non_terminal in self._non_terminals:
+            self._set_first_of_non_terminal(non_terminal)
+
+        return None
+
+    def _set_first_of_non_terminal(self, non_terminal: str) -> None:
+        productions = self.get_all_productions_of_state(non_terminal)
+        for production in productions:
+            actual_symbol_of_production = production[0]
+            if actual_symbol_of_production in self._terminals:
+                self._first[non_terminal].add(actual_symbol_of_production)
+            elif actual_symbol_of_production == "&":
+                self._first[non_terminal].add("&")
+            else:
+                for symbol in production:
+                    if symbol in self._terminals:
+                        self._first[non_terminal].add(symbol)
+                        break
+
+                    first_of_symbol: Set[str] = self._get_first_of_non_terminal(symbol)
+                    self._first[non_terminal] |= first_of_symbol
+                    if "&" not in first_of_symbol:
+                        break
+
+        return None
+
+    def _get_first_of_non_terminal(self, non_terminal: str) -> Set[str]:
+        if not self._first[non_terminal]:
+            self._set_first_of_non_terminal(non_terminal)
+
+        return self._first[non_terminal]
+
+    def _set_follow(self) -> None:
+        self._follow: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
+        for non_terminal in self._non_terminals:
+            self._set_follow_of_non_terminal(non_terminal)
+
+        return None
+
+    def _set_follow_of_non_terminal(self, non_terminal: str) -> None:
         return None
 
     def __repr__(self) -> str:
