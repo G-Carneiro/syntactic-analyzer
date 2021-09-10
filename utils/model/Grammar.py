@@ -115,15 +115,17 @@ class NonContextGrammar:
             elif actual_symbol_of_production == "&":
                 self._first[non_terminal].add("&")
             else:
-                for symbol in production:
-                    if symbol in self._terminals:
-                        self._first[non_terminal].add(symbol)
+                for i in range(len(production)):
+                    if production[i] in self._terminals:
+                        self._first[non_terminal].add(production[i])
                         break
 
-                    first_of_symbol: Set[str] = self._get_first_of_non_terminal(symbol)
-                    self._first[non_terminal] |= first_of_symbol
+                    first_of_symbol: Set[str] = self._get_first_of_non_terminal(production[i])
+                    self._first[non_terminal] |= first_of_symbol - {"&"}
                     if "&" not in first_of_symbol:
                         break
+                    elif i == len(production):
+                        self._first[non_terminal].add("&")
 
         return None
 

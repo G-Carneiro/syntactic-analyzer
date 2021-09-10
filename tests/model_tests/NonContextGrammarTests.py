@@ -82,3 +82,24 @@ class NonContextGrammarTests(unittest.TestCase):
             aux_grammar._eliminate_left_recursion()
             self.assertEqual(aux_grammar.get_transitions(), expected_productions)
 
+        return None
+
+    def test_first(self) -> None:
+        grammar_input = "S -> A B \n"\
+                        "A -> a B A \n"\
+                        "A -> & \n"\
+                        "B -> C D \n"\
+                        "C -> b D C \n"\
+                        "C -> & \n"\
+                        "D -> c S c \n"\
+                        "D -> d"
+        grammar = NonContextGrammar(grammar_input)
+        expected_first = {"S": {"a", "b", "c", "d"},
+                          "A": {"a", "&"},
+                          "B": {"b", "c", "d"},
+                          "C": {"b", "&"},
+                          "D": {"c", "d"}}
+        self.assertEqual(grammar.get_first(), expected_first)
+
+        return None
+
