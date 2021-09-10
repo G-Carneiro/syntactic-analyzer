@@ -137,6 +137,7 @@ class NonContextGrammar:
 
     def _set_follow(self) -> None:
         self._follow: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
+        self._follow[self._initial_symbol].add("$")
         for non_terminal in self._non_terminals:
             self._set_follow_of_non_terminal(non_terminal)
 
