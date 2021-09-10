@@ -38,6 +38,12 @@ class NonContextGrammar:
     def get_transitions(self) -> Set[Tuple[str, Tuple[str]]]:
         return self._transitions
 
+    def get_first(self) -> Dict[str, Set[str]]:
+        return self._first
+
+    def get_follow(self) -> Dict[str, Set[str]]:
+        return self._follow
+
     def _eliminate_left_recursion(self) -> None:
         non_terminals: List[str] = list(sorted(self._non_terminals))
         for i in range(len(non_terminals)):
