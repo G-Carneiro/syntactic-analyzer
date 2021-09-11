@@ -1,4 +1,5 @@
 from typing import Set, List, Tuple, Dict
+import os
 from copy import copy
 
 
@@ -98,6 +99,31 @@ class NonContextGrammar:
 
     def _left_factoring(self) -> None:
         return None
+
+    def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
+        size: int = 0
+        i: int = 0
+        while i < min(len(prefix1), len(prefix2)):
+            if prefix1[i] == prefix2[i]:
+                size += 1
+                i += 1
+            else:
+                break
+
+        return size
+
+    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple:
+        prefix: Tuple = tuple()
+        maxsize: int = 0
+
+        for i in range(len(productions) - 1):
+            for j in range(i + 1, len(productions)):
+                t = self._common_prefix_size(productions[i], productions[j])
+                maxsize = max(maxsize, t)
+                if maxsize == t:
+                    prefix = productions[i][:maxsize]
+
+        return prefix
 
     def _set_first(self) -> None:
         self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
