@@ -138,13 +138,39 @@ class NonContextGrammar:
     def _set_follow(self) -> None:
         self._follow: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
         self._follow[self._initial_symbol].add("$")
-        for non_terminal in self._non_terminals:
+        for non_terminal in sorted(self._non_terminals):
             self._set_follow_of_non_terminal(non_terminal)
 
         return None
 
     def _set_follow_of_non_terminal(self, non_terminal: str) -> None:
+        productions: Set[Tuple[str, Tuple[str]]] = set()
+        for production in self._transitions:
+            if non_terminal in production[1]:
+                productions.add(production)
+
+        for production in productions:
+            state: str = production[0]
+            symbols: Tuple[str] = production[1]
+            for i in range(len(symbols)):
+                actual_symbol = symbols[i]
+                if actual_symbol == non_terminal:
+                    if i == len(symbols) - 1:
+                        if actual_symbol != state:
+                            self._follow[actual_symbol] |= self._get_follow_of_non_terminal(state)
+                    elif symbols[i + 1] in self._terminals:
+                        self._follow[actual_symbol].add(symbols[i + 1])
+                    else:
+                        self._follow[actual_symbol] |= self._get_first_of_non_terminal(symbols[i + 1]) - {"&"}
+                        if ("&" in self._get_first_of_non_terminal(symbols[i + 1])):
+                            self._follow[actual_symbol] |= self._get_follow_of_non_terminal(state)
         return None
+
+    def _get_follow_of_non_terminal(self, non_terminal: str) -> Set[str]:
+        if not self._follow[non_terminal]:
+            self._set_follow_of_non_terminal(non_terminal)
+
+        return self._follow[non_terminal]
 
     def __repr__(self) -> str:
         output: str = ""

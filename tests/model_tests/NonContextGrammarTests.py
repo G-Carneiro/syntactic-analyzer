@@ -84,7 +84,7 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    def test_first(self) -> None:
+    def test_first_and_follow(self) -> None:
         grammar_input = "S -> A B \n"\
                         "A -> a B A \n"\
                         "A -> & \n"\
@@ -99,7 +99,13 @@ class NonContextGrammarTests(unittest.TestCase):
                           "B": {"b", "c", "d"},
                           "C": {"b", "&"},
                           "D": {"c", "d"}}
+        expected_follow = {"S": {"$", "c"},
+                           "A": {"b", "c", "d"},
+                           "B": {"$", "a", "b", "c", "d"},
+                           "C": {"c", "d"},
+                           "D": {"$", "a", "b", "c", "d"}}
         self.assertEqual(grammar.get_first(), expected_first)
+        self.assertEqual(grammar.get_follow(), expected_follow)
 
         return None
 
