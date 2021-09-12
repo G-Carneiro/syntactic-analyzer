@@ -165,6 +165,7 @@ class NonContextGrammar:
                     elif symbols[i + 1] in self._terminals:
                         self._follow[actual_symbol].add(symbols[i + 1])
                     else:
+                        # TODO: talvez tenha problemas
                         self._follow[actual_symbol] |= self._get_first_of_non_terminal(symbols[i + 1]) - {"&"}
                         if ("&" in self._get_first_of_non_terminal(symbols[i + 1])):
                             self._follow[actual_symbol] |= self._get_follow_of_non_terminal(state)
@@ -175,6 +176,9 @@ class NonContextGrammar:
             self._set_follow_of_non_terminal(non_terminal)
 
         return self._follow[non_terminal]
+
+    def construct_analysis_table(self):
+        pass
 
     def __repr__(self) -> str:
         output: str = ""
