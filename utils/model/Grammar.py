@@ -107,6 +107,8 @@ class NonContextGrammar:
         return None
 
     def _set_first_of_non_terminal(self, non_terminal: str) -> None:
+        if self._first[non_terminal]:
+            return None
         productions = self.get_all_productions_of_state(non_terminal)
         for production in productions:
             actual_symbol_of_production = production[0]
@@ -144,6 +146,8 @@ class NonContextGrammar:
         return None
 
     def _set_follow_of_non_terminal(self, non_terminal: str) -> None:
+        if (non_terminal != self._initial_symbol) and (self._follow[non_terminal]):
+            return None
         productions: Set[Tuple[str, Tuple[str]]] = set()
         for production in self._transitions:
             if non_terminal in production[1]:
@@ -167,7 +171,7 @@ class NonContextGrammar:
         return None
 
     def _get_follow_of_non_terminal(self, non_terminal: str) -> Set[str]:
-        if not self._follow[non_terminal]:
+        if (non_terminal == self._initial_symbol) or (not self._follow[non_terminal]):
             self._set_follow_of_non_terminal(non_terminal)
 
         return self._follow[non_terminal]
