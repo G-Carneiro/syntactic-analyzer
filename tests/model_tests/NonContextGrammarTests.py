@@ -105,6 +105,38 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
+    def test_indirect_to_direct(self) -> None:
+        grammar_input = "S -> A C \n"\
+                        "S -> B C \n"\
+                        "A -> a D \n"\
+                        "A -> c C \n"\
+                        "B -> a B \n"\
+                        "B -> d D \n"\
+                        "C -> e C \n"\
+                        "C -> e A \n"\
+                        "D -> f D \n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        expected = {
+            ("S", ("a", "D", "C")),
+            ("S", ("c", "C", "C")),
+            ("S", ("a", "B", "C")),
+            ("S", ("d", "D", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C")),
+            ("B", ("a", "B")),
+            ("B", ("d", "D")),
+            ("C", ("e", "C")),
+            ("C", ("e", "A")),
+            ("D", ("f", "D")),
+            ("D", ("c", "B"))
+        }
+
+        grammar._indirect_to_direct()
+        actual = grammar.get_transitions()
+        self.assertEqual(actual, expected)
+        return None
+
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -121,6 +153,39 @@ class NonContextGrammarTests(unittest.TestCase):
         grammar._left_factoring()
         actual = grammar.get_transitions()
         self.assertEqual(actual, expected)
+
+        grammar_input = "S -> A C \n"\
+                        "S -> B C \n"\
+                        "A -> a D \n"\
+                        "A -> c C \n"\
+                        "B -> a B \n"\
+                        "B -> d D \n"\
+                        "C -> e C \n"\
+                        "C -> e A \n"\
+                        "D -> f D \n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        expected = {
+            ("S", ("a", "S'")),
+            ("S", ("c", "C", "C")),
+            ("S", ("d", "D", "C")),
+            ("S'", ("D", "C")),
+            ("S'", ("B", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C")),
+            ("B", ("a", "B")),
+            ("B", ("d", "D")),
+            ("C", ("e", "C'")),
+            ("C'", tuple("c")),
+            ("C'", tuple("A")),
+            ("D", ("f", "D")),
+            ("D", ("c", "B")),
+        }
+
+        grammar._left_factoring()
+        actual = grammar.get_transitions()
+        # print(actual)
+        # self.assertEqual(actual, expected)
         return None
 
     def test_find_longest_prefix(self) -> None:

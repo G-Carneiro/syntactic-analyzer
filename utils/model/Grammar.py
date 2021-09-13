@@ -96,6 +96,29 @@ class NonContextGrammar:
 
         return all_productions
 
+
+    def _indirect_to_direct(self) -> None:
+        ways_to_get_to_terminal = dict()
+        for terminal in self._terminals:
+            ways_to_get_to_terminal[terminal] = set()
+
+        for non_terminal in self._non_terminals:
+            productions = self.get_all_productions_of_state(non_terminal)
+            for production in productions:
+                for symbol in production:
+                    # Se a produção tiver um terminal
+                    if symbol in self._terminals:
+                        ways_to_get_to_terminal[symbol].add(non_terminal)
+
+        new_dict = dict()
+        for terminal, non_terminals in ways_to_get_to_terminal.items():
+            if len(non_terminals) > 1:
+                new_dict[terminal] = non_terminals
+
+        # TODO: fazer substituição
+
+        return None
+
     def _add_new_transition(self, non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> None:
         temp_list: List[str] = list(longest_commom_prefix)
         temp_list.append(non_terminal + "'")
