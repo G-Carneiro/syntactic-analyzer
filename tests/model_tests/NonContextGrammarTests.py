@@ -105,7 +105,6 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    @unittest.skip("Method not ready for testing")
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -113,9 +112,11 @@ class NonContextGrammarTests(unittest.TestCase):
                         "E -> b"
         grammar = NonContextGrammar(grammar_input)
         expected = {
-            ("E", tuple("b")),
             ("S", ("i", "E", "t", "S", "S'")),
-            ("S'", ("e", "S", "&"))
+            ("S", tuple("a")),
+            ("S'", ("e", "S")),
+            ("S'", tuple("&")),
+            ("E", tuple("b"))
         }
         grammar._left_factoring()
         actual = grammar.get_transitions()

@@ -98,6 +98,52 @@ class NonContextGrammar:
         return all_productions
 
     def _left_factoring(self) -> None:
+        new_transitions: Set = set()
+
+        for non_terminal in self._non_terminals:
+            productions: List = list(self.get_all_productions_of_state(non_terminal))
+            longest_commom_prefix: Tuple = self._find_longest_common_prefix(productions)
+
+            if len(longest_commom_prefix) != 0:
+                new_non_terminal: str = non_terminal + "'"
+
+                body = list(longest_commom_prefix)
+                body.append(new_non_terminal)
+
+                transition = (non_terminal, tuple(body))
+                self._transitions.add(transition)
+
+
+                # Substituir todas as produções que tem o prefixo, por uma única produção prefixo A'
+                for production in productions:
+                    if set(longest_commom_prefix).issubset(production):
+                        new_transition: List = list()
+
+                        # Remover transição
+                        removed_transition = (non_terminal, production)
+                        self._transitions.remove(removed_transition)
+
+                        # Adicionar nova transição em A'
+                        production_list = list(production)
+                        longest_commom_prefix_list_len = len(longest_commom_prefix)
+                        new_production = production[longest_commom_prefix_list_len:]
+                        if new_production == ():
+                            new_production = tuple("&")
+                        if len(new_production) == 1:
+                            new_production = tuple(new_production)
+
+                        new_transition.append(new_non_terminal)
+                        new_transition.append(new_production)
+                        new_transitions.add(tuple(new_transition))
+
+                        # string = f"{longest_commom_prefix} está em {production} \n" \
+                                # "Portanto uma nova transição {(new_non_terminal, new_production)} será adicionada \n"
+                        # print(string)
+
+        # print(new_transitions)
+        for new_transition in new_transitions:
+            self._transitions.add(tuple(new_transition))
+
         return None
 
     def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
