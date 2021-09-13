@@ -1,5 +1,4 @@
-from typing import Set, List, Tuple, Dict
-import os
+from typing import Set, List, Tuple, Dict, cast
 from copy import copy
 
 
@@ -8,7 +7,7 @@ class NonContextGrammar:
         self._non_terminals: Set[str] = set()
         self._terminals: Set[str] = set()
         # transition = (non_terminal, sequence of symbols)
-        self._transitions: Set[Tuple[str, Tuple[str]]] = set()
+        self._transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         self._set_grammar(grammar_input)
         self._set_first()
         self._set_follow()
@@ -36,7 +35,7 @@ class NonContextGrammar:
     def get_non_terminals(self) -> Set[str]:
         return self._non_terminals
 
-    def get_transitions(self) -> Set[Tuple[str, Tuple[str]]]:
+    def get_transitions(self) -> Set[Tuple[str, Tuple[str, ...]]]:
         return self._transitions
 
     def get_first(self) -> Dict[str, Set[str]]:
@@ -98,21 +97,19 @@ class NonContextGrammar:
         return all_productions
 
     def _left_factoring(self) -> None:
-        new_transitions: Set = set()
+        new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
 
         for non_terminal in self._non_terminals:
-            productions: List = list(self.get_all_productions_of_state(non_terminal))
-            longest_commom_prefix: Tuple = self._find_longest_common_prefix(productions)
+            productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
+            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
 
-            if len(longest_commom_prefix) != 0:
+            if longest_commom_prefix:
                 new_non_terminal: str = non_terminal + "'"
-
-                body = list(longest_commom_prefix)
-                body.append(new_non_terminal)
-
-                transition = (non_terminal, tuple(body))
+                temp_list: List[str] = list(longest_commom_prefix)
+                temp_list.append(new_non_terminal)
+                new_body: Tuple[str, ...] = tuple(temp_list)
+                transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
                 self._transitions.add(transition)
-
 
                 # Substituir todas as produções que tem o prefixo, por uma única produção prefixo A'
                 for production in productions:
@@ -120,29 +117,24 @@ class NonContextGrammar:
                         new_transition: List = list()
 
                         # Remover transição
-                        removed_transition = (non_terminal, production)
-                        self._transitions.remove(removed_transition)
+                        self._transitions.remove((non_terminal, production))
 
                         # Adicionar nova transição em A'
-                        production_list = list(production)
-                        longest_commom_prefix_list_len = len(longest_commom_prefix)
-                        new_production = production[longest_commom_prefix_list_len:]
-                        if new_production == ():
+                        prefix_size: int = len(longest_commom_prefix)
+                        new_production: Tuple[str, ...] = production[prefix_size:] if len(production[prefix_size:]) > 1 \
+                                                                                    else tuple(production[prefix_size:])
+                        if not(new_production):
                             new_production = tuple("&")
-                        if len(new_production) == 1:
-                            new_production = tuple(new_production)
 
                         new_transition.append(new_non_terminal)
                         new_transition.append(new_production)
-                        new_transitions.add(tuple(new_transition))
+                        new_transition_tuple: Tuple = tuple(new_transition)
+                        new_transitions.add(new_transition_tuple)
 
-                        # string = f"{longest_commom_prefix} está em {production} \n" \
-                                # "Portanto uma nova transição {(new_non_terminal, new_production)} será adicionada \n"
-                        # print(string)
 
-        # print(new_transitions)
-        for new_transition in new_transitions:
-            self._transitions.add(tuple(new_transition))
+        for transition in new_transitions:
+            transition = cast(Tuple[str, Tuple[str, ...]], transition)
+            self._transitions.add(transition)
 
         return None
 
@@ -158,7 +150,7 @@ class NonContextGrammar:
 
         return size
 
-    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple:
+    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple[str]:
         prefix: Tuple = tuple()
         maxsize: int = 0
 
