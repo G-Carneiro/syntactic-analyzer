@@ -22,8 +22,7 @@ class NonContextGrammar:
             self._non_terminals.add(non_terminal)
             transition = (non_terminal, tuple(sequence))
             self._transitions.add(transition)
-            for symbol in sequence:
-                symbols.add(symbol)
+            for symbol in sequence: symbols.add(symbol)
 
         self._terminals = symbols - self._non_terminals
 
@@ -106,16 +105,53 @@ class NonContextGrammar:
             productions = self.get_all_productions_of_state(non_terminal)
             for production in productions:
                 for symbol in production:
-                    # Se a produção tiver um terminal
                     if symbol in self._terminals:
                         ways_to_get_to_terminal[symbol].add(non_terminal)
 
-        new_dict = dict()
+        symbols_of_interst = dict()
         for terminal, non_terminals in ways_to_get_to_terminal.items():
             if len(non_terminals) > 1:
-                new_dict[terminal] = non_terminals
+                symbols_of_interst[terminal] = non_terminals
 
-        # TODO: fazer substituição
+        # Quais produções são não determinísticas?
+        # R: As que tem pelo menos 2 caminhos que levam ao não determinismo
+        # {a : {A, B}}
+        for terminal, non_terminals in symbols_of_interst.items():
+            # a, {A, B}
+            for non_terminal in self._non_terminals:
+                productions = self.get_all_productions_of_state(non_terminal)
+                # {(A, C), (B, C)}
+                sum_ = 0
+                for production in productions:
+                    # (A, C)
+                    for nt in non_terminals:
+                        # A
+                        if nt in production:
+                            sum_ += 1
+                    if sum_ >= 2:
+                        print(f"O NT {non_terminal} tem {sum_} produções ambíguas")
+                        print(f"Preciso substuir as produções de {non_terminal} que contém {non_terminals} pelo corpo dessas produções")
+
+
+        return None
+
+    def _replace_indirect_nd_transitions(self, non_terminal: str, nt_to_replace: str) -> None:
+        productions = list(self.get_all_productions_of_state(nt_to_replace))
+        productions = [list(production) for production in productions]
+
+        replaceble_productions = list(self.get_all_productions_of_state(non_terminal))
+        replaceble_productions = [list(production) for production in replaceble_productions]
+
+        for production in productions:
+            for rp_prod in replaceble_productions:
+                if nt_to_replace in rp_prod:
+                    index = rp_prod.index(nt_to_replace)
+                    new_production = production + rp_prod[index+1:]
+                    new_transition = (non_terminal, tuple(new_production))
+                    self._transitions.add(new_transition)
+                    removed_transition = (non_terminal, tuple(rp_prod))
+                    if removed_transition in self._transitions:
+                        self._transitions.remove(removed_transition)
 
         return None
 

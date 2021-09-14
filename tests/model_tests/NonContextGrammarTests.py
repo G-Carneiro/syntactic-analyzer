@@ -105,6 +105,7 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
+    @unittest.skip("")
     def test_indirect_to_direct(self) -> None:
         grammar_input = "S -> A C \n"\
                         "S -> B C \n"\
@@ -137,6 +138,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(actual, expected)
         return None
 
+    @unittest.skip("")
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -154,16 +156,18 @@ class NonContextGrammarTests(unittest.TestCase):
         actual = grammar.get_transitions()
         self.assertEqual(actual, expected)
 
-        grammar_input = "S -> A C \n"\
-                        "S -> B C \n"\
-                        "A -> a D \n"\
-                        "A -> c C \n"\
-                        "B -> a B \n"\
-                        "B -> d D \n"\
-                        "C -> e C \n"\
-                        "C -> e A \n"\
-                        "D -> f D \n"\
-                        "D -> C B"
+        grammar_input = "S -> a D C\n"\
+                        "S -> c C C\n"\
+                        "S -> a B C\n"\
+                        "S -> d D C\n"\
+                        "A -> a D\n"\
+                        "A -> c C\n"\
+                        "B -> a B\n"\
+                        "B -> d D\n"\
+                        "C -> e C\n"\
+                        "C -> e A\n"\
+                        "D -> f D\n"\
+                        "D -> c B"
         grammar = NonContextGrammar(grammar_input)
         expected = {
             ("S", ("a", "S'")),
@@ -176,7 +180,7 @@ class NonContextGrammarTests(unittest.TestCase):
             ("B", ("a", "B")),
             ("B", ("d", "D")),
             ("C", ("e", "C'")),
-            ("C'", tuple("c")),
+            ("C'", tuple("C")),
             ("C'", tuple("A")),
             ("D", ("f", "D")),
             ("D", ("c", "B")),
@@ -184,8 +188,28 @@ class NonContextGrammarTests(unittest.TestCase):
 
         grammar._left_factoring()
         actual = grammar.get_transitions()
-        # print(actual)
-        # self.assertEqual(actual, expected)
+        self.assertEqual(actual, expected)
+        return None
+
+    def test_replace_transitions(self) -> None:
+        grammar_input = "S -> A C \n"\
+                        "S -> B C \n"\
+                        "A -> a D \n"\
+                        "A -> c C"
+
+        grammar = NonContextGrammar(grammar_input)
+        grammar._replace_indirect_nd_transitions("S", "A")
+
+        expected = {
+            ("S", ("a", "D", "C")),
+            ("S", ("c", "C", "C")),
+            ("S", ("B", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C"))
+        }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected, actual)
+
         return None
 
     def test_find_longest_prefix(self) -> None:
