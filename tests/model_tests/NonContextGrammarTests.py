@@ -105,7 +105,6 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    @unittest.skip("")
     def test_indirect_to_direct(self) -> None:
         grammar_input = "S -> A C \n"\
                         "S -> B C \n"\
@@ -130,7 +129,7 @@ class NonContextGrammarTests(unittest.TestCase):
             ("C", ("e", "C")),
             ("C", ("e", "A")),
             ("D", ("f", "D")),
-            ("D", ("c", "B"))
+            ("D", ("C", "B"))
         }
 
         grammar._indirect_to_direct()

@@ -129,9 +129,8 @@ class NonContextGrammar:
                         if nt in production:
                             sum_ += 1
                     if sum_ >= 2:
-                        print(f"O NT {non_terminal} tem {sum_} produções ambíguas")
-                        print(f"Preciso substuir as produções de {non_terminal} que contém {non_terminals} pelo corpo dessas produções")
-
+                        for nt_to_replace in non_terminals:
+                            self._replace_indirect_nd_transitions(non_terminal, nt_to_replace)
 
         return None
 
