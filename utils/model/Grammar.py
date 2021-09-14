@@ -136,24 +136,33 @@ class NonContextGrammar:
         return None
 
     def _replace_indirect_nd_transitions(self, non_terminal: str, nt_to_replace: str) -> None:
-        productions = list(self.get_all_productions_of_state(nt_to_replace))
-        productions = [list(production) for production in productions]
-
-        replaceble_productions = list(self.get_all_productions_of_state(non_terminal))
-        replaceble_productions = [list(production) for production in replaceble_productions]
+        productions: List[Tuple[str]] = list(self.get_all_productions_of_state(nt_to_replace))
+        productions_to_replace: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
 
         for production in productions:
-            for rp_prod in replaceble_productions:
-                if nt_to_replace in rp_prod:
-                    index = rp_prod.index(nt_to_replace)
-                    new_production = production + rp_prod[index+1:]
-                    new_transition = (non_terminal, tuple(new_production))
+            for production_to_replace in productions_to_replace:
+                if nt_to_replace in production_to_replace:
+                    new_body: Tuple[str, ...] = self._get_new_body(production, production_to_replace, nt_to_replace)
+                    new_transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
                     self._transitions.add(new_transition)
-                    removed_transition = (non_terminal, tuple(rp_prod))
+
+                    removed_transition: Tuple[str, Tuple[str, ...]] = (non_terminal, tuple(production_to_replace))
                     if removed_transition in self._transitions:
                         self._transitions.remove(removed_transition)
 
         return None
+
+    def _get_new_body(self,
+                      production: Tuple[str, ...],
+                      production_to_replace: Tuple[str, ...],
+                      nt_to_replace: str
+                    ) -> Tuple[str, ...]:
+        production_list = list(production)
+        production_to_replace_list = list(production_to_replace)
+        index = production_to_replace.index(nt_to_replace)
+        new_body: Tuple[str, ...] = tuple(production_list + production_to_replace_list[index + 1:])
+
+        return new_body
 
     def _add_new_transition(self, non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> None:
         temp_list: List[str] = list(longest_commom_prefix)
