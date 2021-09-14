@@ -95,11 +95,43 @@ class NonContextGrammar:
 
         return all_productions
 
+    def _left_factoring(self) -> None:
+        new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
 
-    def _indirect_to_direct(self) -> None:
-        ways_to_get_to_terminal = dict()
-        for terminal in self._terminals:
-            ways_to_get_to_terminal[terminal] = set()
+        for non_terminal in self._non_terminals:
+            productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
+            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
+
+            if longest_commom_prefix:
+                self._add_new_transition(non_terminal, longest_commom_prefix)
+                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
+
+        for transition in new_transitions:
+            transition = cast(Tuple[str, Tuple[str, ...]], transition)
+            self._transitions.add(transition)
+
+        return None
+
+
+    def _replace_indirect_to_direct_non_determinism(self) -> None:
+        productions_with_same_terminals: Dict[str, Set] = self._get_productions_with_same_terminals()
+
+        for _, non_terminals in productions_with_same_terminals.items():
+            for non_terminal in self._non_terminals:
+                productions = self.get_all_productions_of_state(non_terminal)
+                sum_ = 0
+                for production in productions:
+                    for nt in non_terminals:
+                        if nt in production:
+                            sum_ += 1
+                    if sum_ >= 2:
+                        for nt_to_replace in non_terminals:
+                            self._replace_indirect_nd_transitions(non_terminal, nt_to_replace)
+
+        return None
+
+    def _get_productions_with_same_terminals(self) -> Dict[str, Set]:
+        ways_to_get_to_terminal: Dict[str, Set] = {terminal: set() for terminal in self._terminals}
 
         for non_terminal in self._non_terminals:
             productions = self.get_all_productions_of_state(non_terminal)
@@ -108,31 +140,7 @@ class NonContextGrammar:
                     if symbol in self._terminals:
                         ways_to_get_to_terminal[symbol].add(non_terminal)
 
-        symbols_of_interst = dict()
-        for terminal, non_terminals in ways_to_get_to_terminal.items():
-            if len(non_terminals) > 1:
-                symbols_of_interst[terminal] = non_terminals
-
-        # Quais produções são não determinísticas?
-        # R: As que tem pelo menos 2 caminhos que levam ao não determinismo
-        # {a : {A, B}}
-        for terminal, non_terminals in symbols_of_interst.items():
-            # a, {A, B}
-            for non_terminal in self._non_terminals:
-                productions = self.get_all_productions_of_state(non_terminal)
-                # {(A, C), (B, C)}
-                sum_ = 0
-                for production in productions:
-                    # (A, C)
-                    for nt in non_terminals:
-                        # A
-                        if nt in production:
-                            sum_ += 1
-                    if sum_ >= 2:
-                        for nt_to_replace in non_terminals:
-                            self._replace_indirect_nd_transitions(non_terminal, nt_to_replace)
-
-        return None
+        return dict(filter(lambda item: len(item[1]) > 1, ways_to_get_to_terminal.items()))
 
     def _replace_indirect_nd_transitions(self, non_terminal: str, nt_to_replace: str) -> None:
         productions: List[Tuple[str]] = list(self.get_all_productions_of_state(nt_to_replace))
@@ -204,23 +212,6 @@ class NonContextGrammar:
                 new_transitions = self._add_factored_transition(new_transitions, production, prefix, non_terminal)
 
         return new_transitions
-
-    def _left_factoring(self) -> None:
-        new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
-
-        for non_terminal in self._non_terminals:
-            productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
-            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
-
-            if longest_commom_prefix:
-                self._add_new_transition(non_terminal, longest_commom_prefix)
-                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
-
-        for transition in new_transitions:
-            transition = cast(Tuple[str, Tuple[str, ...]], transition)
-            self._transitions.add(transition)
-
-        return None
 
     def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
         size: int = 0

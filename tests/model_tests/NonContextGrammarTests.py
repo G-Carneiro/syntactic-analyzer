@@ -5,6 +5,7 @@ from utils.model.Grammar import NonContextGrammar
 
 
 class NonContextGrammarTests(unittest.TestCase):
+
     def test_grammar_input(self) -> None:
         grammar_input: str = "P -> K V C \n" \
                              "K -> c K \n" \
@@ -132,12 +133,15 @@ class NonContextGrammarTests(unittest.TestCase):
             ("D", ("C", "B"))
         }
 
-        grammar._indirect_to_direct()
+        grammar._replace_indirect_to_direct_non_determinism()
         actual = grammar.get_transitions()
         self.assertEqual(actual, expected)
         return None
 
-    @unittest.skip("")
+    """
+    Left Factoring Tests
+    """
+
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -188,6 +192,7 @@ class NonContextGrammarTests(unittest.TestCase):
         grammar._left_factoring()
         actual = grammar.get_transitions()
         self.assertEqual(actual, expected)
+
         return None
 
     def test_replace_transitions(self) -> None:
