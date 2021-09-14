@@ -96,24 +96,11 @@ class NonContextGrammar:
         return all_productions
 
     def _left_factoring(self) -> None:
-        new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
-
-        for non_terminal in self._non_terminals:
-            productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
-            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
-
-            if longest_commom_prefix:
-                self._add_new_transition(non_terminal, longest_commom_prefix)
-                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
-
-        for transition in new_transitions:
-            transition = cast(Tuple[str, Tuple[str, ...]], transition)
-            self._transitions.add(transition)
-
+        self._replace_indirect_with_direct_non_determinism()
+        self._remove_direct_non_determinism()
         return None
 
-
-    def _replace_indirect_to_direct_non_determinism(self) -> None:
+    def _replace_indirect_with_direct_non_determinism(self) -> None:
         productions_with_same_terminals: Dict[str, Set] = self._get_productions_with_same_terminals()
 
         for _, non_terminals in productions_with_same_terminals.items():
@@ -130,6 +117,7 @@ class NonContextGrammar:
 
         return None
 
+
     def _get_productions_with_same_terminals(self) -> Dict[str, Set]:
         ways_to_get_to_terminal: Dict[str, Set] = {terminal: set() for terminal in self._terminals}
 
@@ -141,6 +129,7 @@ class NonContextGrammar:
                         ways_to_get_to_terminal[symbol].add(non_terminal)
 
         return dict(filter(lambda item: len(item[1]) > 1, ways_to_get_to_terminal.items()))
+
 
     def _replace_indirect_nd_transitions(self, non_terminal: str, nt_to_replace: str) -> None:
         productions: List[Tuple[str]] = list(self.get_all_productions_of_state(nt_to_replace))
@@ -171,6 +160,52 @@ class NonContextGrammar:
 
         return new_body
 
+
+    def _remove_direct_non_determinism(self) -> None:
+        new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
+
+        for non_terminal in self._non_terminals:
+            productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
+            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
+
+            if longest_commom_prefix:
+                self._add_new_transition(non_terminal, longest_commom_prefix)
+                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
+
+        for transition in new_transitions:
+            transition = cast(Tuple[str, Tuple[str, ...]], transition)
+            self._transitions.add(transition)
+
+        return None
+
+
+    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple[str]:
+        prefix: Tuple = tuple()
+        maxsize: int = 0
+
+        for i in range(len(productions) - 1):
+            for j in range(i + 1, len(productions)):
+                t = self._common_prefix_size(productions[i], productions[j])
+                maxsize = max(maxsize, t)
+                if maxsize == t:
+                    prefix = productions[i][:maxsize]
+
+        return prefix
+
+
+    def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
+        size: int = 0
+        i: int = 0
+        while i < min(len(prefix1), len(prefix2)):
+            if prefix1[i] == prefix2[i]:
+                size += 1
+                i += 1
+            else:
+                break
+
+        return size
+
+
     def _add_new_transition(self, non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> None:
         temp_list: List[str] = list(longest_commom_prefix)
         temp_list.append(non_terminal + "'")
@@ -179,6 +214,21 @@ class NonContextGrammar:
         self._transitions.add(transition)
 
         return None
+
+
+    def _replace_transitions(self,
+                            new_transitions: Set[Tuple[str, Tuple[str, ...]]],
+                            productions: List[Tuple[str]], 
+                            prefix: Tuple[str, ...], 
+                            non_terminal: str
+                        ) -> Set[Tuple[str, Tuple[str, ...]]]:
+        for production in productions:
+            if set(prefix).issubset(production):
+                self._transitions.remove((non_terminal, production))
+                new_transitions = self._add_factored_transition(new_transitions, production, prefix, non_terminal)
+
+        return new_transitions
+
 
     def _add_factored_transition(self,
                                 new_transitions: Set[Tuple[str, Tuple[str, ...]]],
@@ -200,43 +250,6 @@ class NonContextGrammar:
 
         return new_transitions
 
-    def _replace_transitions(self,
-                            new_transitions: Set[Tuple[str, Tuple[str, ...]]],
-                            productions: List[Tuple[str]], 
-                            prefix: Tuple[str, ...], 
-                            non_terminal: str
-                        ) -> Set[Tuple[str, Tuple[str, ...]]]:
-        for production in productions:
-            if set(prefix).issubset(production):
-                self._transitions.remove((non_terminal, production))
-                new_transitions = self._add_factored_transition(new_transitions, production, prefix, non_terminal)
-
-        return new_transitions
-
-    def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
-        size: int = 0
-        i: int = 0
-        while i < min(len(prefix1), len(prefix2)):
-            if prefix1[i] == prefix2[i]:
-                size += 1
-                i += 1
-            else:
-                break
-
-        return size
-
-    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple[str]:
-        prefix: Tuple = tuple()
-        maxsize: int = 0
-
-        for i in range(len(productions) - 1):
-            for j in range(i + 1, len(productions)):
-                t = self._common_prefix_size(productions[i], productions[j])
-                maxsize = max(maxsize, t)
-                if maxsize == t:
-                    prefix = productions[i][:maxsize]
-
-        return prefix
 
     def _set_first(self) -> None:
         self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}

@@ -106,38 +106,6 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    def test_indirect_to_direct(self) -> None:
-        grammar_input = "S -> A C \n"\
-                        "S -> B C \n"\
-                        "A -> a D \n"\
-                        "A -> c C \n"\
-                        "B -> a B \n"\
-                        "B -> d D \n"\
-                        "C -> e C \n"\
-                        "C -> e A \n"\
-                        "D -> f D \n"\
-                        "D -> C B"
-        grammar = NonContextGrammar(grammar_input)
-        expected = {
-            ("S", ("a", "D", "C")),
-            ("S", ("c", "C", "C")),
-            ("S", ("a", "B", "C")),
-            ("S", ("d", "D", "C")),
-            ("A", ("a", "D")),
-            ("A", ("c", "C")),
-            ("B", ("a", "B")),
-            ("B", ("d", "D")),
-            ("C", ("e", "C")),
-            ("C", ("e", "A")),
-            ("D", ("f", "D")),
-            ("D", ("C", "B"))
-        }
-
-        grammar._replace_indirect_to_direct_non_determinism()
-        actual = grammar.get_transitions()
-        self.assertEqual(actual, expected)
-        return None
-
     """
     Left Factoring Tests
     """
@@ -159,10 +127,8 @@ class NonContextGrammarTests(unittest.TestCase):
         actual = grammar.get_transitions()
         self.assertEqual(actual, expected)
 
-        grammar_input = "S -> a D C\n"\
-                        "S -> c C C\n"\
-                        "S -> a B C\n"\
-                        "S -> d D C\n"\
+        grammar_input = "S -> A C\n"\
+                        "S -> B C\n"\
                         "A -> a D\n"\
                         "A -> c C\n"\
                         "B -> a B\n"\
@@ -170,8 +136,9 @@ class NonContextGrammarTests(unittest.TestCase):
                         "C -> e C\n"\
                         "C -> e A\n"\
                         "D -> f D\n"\
-                        "D -> c B"
+                        "D -> C B"
         grammar = NonContextGrammar(grammar_input)
+        grammar._left_factoring()
         expected = {
             ("S", ("a", "S'")),
             ("S", ("c", "C", "C")),
@@ -186,57 +153,141 @@ class NonContextGrammarTests(unittest.TestCase):
             ("C'", tuple("C")),
             ("C'", tuple("A")),
             ("D", ("f", "D")),
-            ("D", ("c", "B")),
-        }
-
-        grammar._left_factoring()
-        actual = grammar.get_transitions()
-        self.assertEqual(actual, expected)
-
-        return None
-
-    def test_replace_transitions(self) -> None:
-        grammar_input = "S -> A C \n"\
-                        "S -> B C \n"\
-                        "A -> a D \n"\
-                        "A -> c C"
-
-        grammar = NonContextGrammar(grammar_input)
-        grammar._replace_indirect_nd_transitions("S", "A")
-
-        expected = {
-            ("S", ("a", "D", "C")),
-            ("S", ("c", "C", "C")),
-            ("S", ("B", "C")),
-            ("A", ("a", "D")),
-            ("A", ("c", "C"))
+            ("D", ("C", "B"))
         }
         actual = grammar.get_transitions()
         self.assertEqual(expected, actual)
-
         return None
 
-    def test_find_longest_prefix(self) -> None:
-        grammar_input = "S -> i E t S \n"\
-                        "S -> i E t S e S \n"\
-                        "S -> a \n"\
-                        "E -> b"
-        production = [('a',), ('i', 'E', 't', 'S', 'e', 'S'), ('i', 'E', 't', 'S')]
-        grammar = NonContextGrammar(grammar_input)
 
-        expected = ('i', 'E', 't', 'S')
-        actual = grammar._find_longest_common_prefix(production)
-        self.assertEqual(expected, actual)
+    # def test_indirect_to_direct(self) -> None:
+        # grammar_input = "S -> A C \n"\
+                        # "S -> B C \n"\
+                        # "A -> a D \n"\
+                        # "A -> c C \n"\
+                        # "B -> a B \n"\
+                        # "B -> d D \n"\
+                        # "C -> e C \n"\
+                        # "C -> e A \n"\
+                        # "D -> f D \n"\
+                        # "D -> C B"
+        # grammar = NonContextGrammar(grammar_input)
+        # expected = {
+            # ("S", ("a", "D", "C")),
+            # ("S", ("c", "C", "C")),
+            # ("S", ("a", "B", "C")),
+            # ("S", ("d", "D", "C")),
+            # ("A", ("a", "D")),
+            # ("A", ("c", "C")),
+            # ("B", ("a", "B")),
+            # ("B", ("d", "D")),
+            # ("C", ("e", "C")),
+            # ("C", ("e", "A")),
+            # ("D", ("f", "D")),
+            # ("D", ("C", "B"))
+        # }
 
-        production = [
-            ('f', 'o', 'o'),
-            ('f', 'o', 'o', 'b', 'a', 'r'),
-            ('f', 'o', 'o', 't', 'b', 'a', 'l', 'l'),
-            ('f', 'o', 'o', 't', 'b', 'a', 'g'),
-            ('b', 'a', 'r'),
-        ]
+        # grammar._replace_indirect_to_direct_non_determinism()
+        # actual = grammar.get_transitions()
+        # self.assertEqual(actual, expected)
+        # return None
 
-        expected = ('f', 'o', 'o', 't', 'b', 'a')
-        actual = grammar._find_longest_common_prefix(production)
-        self.assertEqual(expected, actual)
-        return None
+
+    # def test_left_factoring(self) -> None:
+        # grammar_input = "S -> i E t S \n"\
+                        # "S -> i E t S e S \n"\
+                        # "S -> a \n"\
+                        # "E -> b"
+        # grammar = NonContextGrammar(grammar_input)
+        # expected = {
+            # ("S", ("i", "E", "t", "S", "S'")),
+            # ("S", tuple("a")),
+            # ("S'", ("e", "S")),
+            # ("S'", tuple("&")),
+            # ("E", tuple("b"))
+        # }
+        # grammar._left_factoring()
+        # actual = grammar.get_transitions()
+        # self.assertEqual(actual, expected)
+
+        # grammar_input = "S -> a D C\n"\
+                        # "S -> c C C\n"\
+                        # "S -> a B C\n"\
+                        # "S -> d D C\n"\
+                        # "A -> a D\n"\
+                        # "A -> c C\n"\
+                        # "B -> a B\n"\
+                        # "B -> d D\n"\
+                        # "C -> e C\n"\
+                        # "C -> e A\n"\
+                        # "D -> f D\n"\
+                        # "D -> c B"
+        # grammar = NonContextGrammar(grammar_input)
+        # expected = {
+            # ("S", ("a", "S'")),
+            # ("S", ("c", "C", "C")),
+            # ("S", ("d", "D", "C")),
+            # ("S'", ("D", "C")),
+            # ("S'", ("B", "C")),
+            # ("A", ("a", "D")),
+            # ("A", ("c", "C")),
+            # ("B", ("a", "B")),
+            # ("B", ("d", "D")),
+            # ("C", ("e", "C'")),
+            # ("C'", tuple("C")),
+            # ("C'", tuple("A")),
+            # ("D", ("f", "D")),
+            # ("D", ("c", "B")),
+        # }
+
+        # grammar._left_factoring()
+        # actual = grammar.get_transitions()
+        # self.assertEqual(actual, expected)
+
+        # return None
+
+    # def test_replace_transitions(self) -> None:
+        # grammar_input = "S -> A C \n"\
+                        # "S -> B C \n"\
+                        # "A -> a D \n"\
+                        # "A -> c C"
+
+        # grammar = NonContextGrammar(grammar_input)
+        # grammar._replace_indirect_nd_transitions("S", "A")
+
+        # expected = {
+            # ("S", ("a", "D", "C")),
+            # ("S", ("c", "C", "C")),
+            # ("S", ("B", "C")),
+            # ("A", ("a", "D")),
+            # ("A", ("c", "C"))
+        # }
+        # actual = grammar.get_transitions()
+        # self.assertEqual(expected, actual)
+
+        # return None
+
+    # def test_find_longest_prefix(self) -> None:
+        # grammar_input = "S -> i E t S \n"\
+                        # "S -> i E t S e S \n"\
+                        # "S -> a \n"\
+                        # "E -> b"
+        # production = [('a',), ('i', 'E', 't', 'S', 'e', 'S'), ('i', 'E', 't', 'S')]
+        # grammar = NonContextGrammar(grammar_input)
+
+        # expected = ('i', 'E', 't', 'S')
+        # actual = grammar._find_longest_common_prefix(production)
+        # self.assertEqual(expected, actual)
+
+        # production = [
+            # ('f', 'o', 'o'),
+            # ('f', 'o', 'o', 'b', 'a', 'r'),
+            # ('f', 'o', 'o', 't', 'b', 'a', 'l', 'l'),
+            # ('f', 'o', 'o', 't', 'b', 'a', 'g'),
+            # ('b', 'a', 'r'),
+        # ]
+
+        # expected = ('f', 'o', 'o', 't', 'b', 'a')
+        # actual = grammar._find_longest_common_prefix(production)
+        # self.assertEqual(expected, actual)
+        # return None
