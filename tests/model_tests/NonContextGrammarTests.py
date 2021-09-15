@@ -116,6 +116,62 @@ class NonContextGrammarTests(unittest.TestCase):
     Left Factoring Tests
     """
 
+    def test_get_productions_with_same_terminals(self) -> None:
+        grammar_input = "S -> A C\n"\
+                        "S -> B C\n"\
+                        "A -> a D\n"\
+                        "A -> c C\n"\
+                        "B -> a B\n"\
+                        "B -> d D\n"\
+                        "C -> e C\n"\
+                        "C -> e A\n"\
+                        "D -> f D\n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        expected = {"a": {"A", "B"}}
+        actual = grammar._get_productions_with_same_terminals()
+        self.assertEqual(expected, actual)
+
+        grammar_input = "S -> z\n"\
+                        "A -> z\n"\
+                        "B -> x C D\n"\
+                        "C -> x A B"
+        grammar = NonContextGrammar(grammar_input)
+        expected = {"z": {"S", "A"}, "x": {"B", "C"}}
+        actual = grammar._get_productions_with_same_terminals()
+        self.assertEqual(expected, actual)
+        return None
+
+    def test_replace_indirect_nd_transitions(self) -> None:
+        grammar_input = "S -> A C\n"\
+                        "S -> B C\n"\
+                        "A -> a D\n"\
+                        "A -> c C\n"\
+                        "B -> a B\n"\
+                        "B -> d D\n"\
+                        "C -> e C\n"\
+                        "C -> e A\n"\
+                        "D -> f D\n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        grammar._replace_indirect_nd_transitions("S", "A")
+        expected = {
+            ("S", ("a", "D", "C")),
+            ("S", ("c", "C", "C")),
+            ("S", ("B", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C")),
+            ("B", ("a", "B")),
+            ("B", ("d", "D")),
+            ("C", ("e", "C")),
+            ("C", ("e", "A")),
+            ("D", ("f", "D")),
+            ("D", ("C", "B"))
+        }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected, actual)
+        return None
+
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
