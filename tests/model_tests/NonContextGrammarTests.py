@@ -172,6 +172,89 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    def test_replace_indirect_with_direct_non_determinism(self) -> None:
+        grammar_input = "S -> A C\n"\
+                        "S -> B C\n"\
+                        "A -> a D\n"\
+                        "A -> c C\n"\
+                        "B -> a B\n"\
+                        "B -> d D\n"\
+                        "C -> e C\n"\
+                        "C -> e A\n"\
+                        "D -> f D\n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        grammar._replace_indirect_with_direct_non_determinism()
+        expected = {
+            ("S", ("a", "D", "C")),
+            ("S", ("c", "C", "C")),
+            ("S", ("a", "B", "C")),
+            ("S", ("d", "D", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C")),
+            ("B", ("a", "B")),
+            ("B", ("d", "D")),
+            ("C", ("e", "C")),
+            ("C", ("e", "A")),
+            ("D", ("f", "D")),
+            ("D", ("C", "B"))
+        }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected, actual)
+        return None
+
+    def test_remove_direct_non_determinism(self) -> None:
+        grammar_input = "S -> i E t S \n"\
+                        "S -> i E t S e S \n"\
+                        "S -> a \n"\
+                        "E -> b"
+        grammar = NonContextGrammar(grammar_input)
+        expected = {
+            ("S", ("i", "E", "t", "S", "S'")),
+            ("S", tuple("a")),
+            ("S'", ("e", "S")),
+            ("S'", tuple("&")),
+            ("E", tuple("b"))
+        }
+        grammar._remove_direct_non_determinism()
+        actual = grammar.get_transitions()
+        self.assertEqual(actual, expected)
+
+        grammar_input = "S -> a D C\n"\
+                        "S -> c C C\n"\
+                        "S -> a B C\n"\
+                        "S -> d D C\n"\
+                        "A -> a D\n"\
+                        "A -> c C\n"\
+                        "B -> a B\n"\
+                        "B -> d D\n"\
+                        "C -> e C\n"\
+                        "C -> e A\n"\
+                        "D -> f D\n"\
+                        "D -> C B"
+        grammar = NonContextGrammar(grammar_input)
+        grammar._remove_direct_non_determinism()
+        expected = {
+            ("S", ("a", "S'")),
+            ("S", ("c", "C", "C")),
+            ("S", ("d", "D", "C")),
+            ("S'", ("D", "C")),
+            ("S'", ("B", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C")),
+            ("B", ("a", "B")),
+            ("B", ("d", "D")),
+            ("C", ("e", "C'")),
+            ("C'", tuple("C")),
+            ("C'", tuple("A")),
+            ("D", ("f", "D")),
+            ("D", ("C", "B")),
+        }
+        grammar._remove_direct_non_determinism()
+        actual = grammar.get_transitions()
+        self.assertEqual(expected, actual)
+        return None
+
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -221,110 +304,23 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    def test_replace_transitions(self) -> None:
+        grammar_input = "S -> A C \n"\
+                        "S -> B C \n"\
+                        "A -> a D \n"\
+                        "A -> c C"
 
-    # def test_indirect_to_direct(self) -> None:
-        # grammar_input = "S -> A C \n"\
-                        # "S -> B C \n"\
-                        # "A -> a D \n"\
-                        # "A -> c C \n"\
-                        # "B -> a B \n"\
-                        # "B -> d D \n"\
-                        # "C -> e C \n"\
-                        # "C -> e A \n"\
-                        # "D -> f D \n"\
-                        # "D -> C B"
-        # grammar = NonContextGrammar(grammar_input)
-        # expected = {
-            # ("S", ("a", "D", "C")),
-            # ("S", ("c", "C", "C")),
-            # ("S", ("a", "B", "C")),
-            # ("S", ("d", "D", "C")),
-            # ("A", ("a", "D")),
-            # ("A", ("c", "C")),
-            # ("B", ("a", "B")),
-            # ("B", ("d", "D")),
-            # ("C", ("e", "C")),
-            # ("C", ("e", "A")),
-            # ("D", ("f", "D")),
-            # ("D", ("C", "B"))
-        # }
+        grammar = NonContextGrammar(grammar_input)
+        grammar._replace_indirect_nd_transitions("S", "A")
 
-        # grammar._replace_indirect_to_direct_non_determinism()
-        # actual = grammar.get_transitions()
-        # self.assertEqual(actual, expected)
-        # return None
+        expected = {
+            ("S", ("a", "D", "C")),
+            ("S", ("c", "C", "C")),
+            ("S", ("B", "C")),
+            ("A", ("a", "D")),
+            ("A", ("c", "C"))
+        }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected, actual)
 
-
-    # def test_left_factoring(self) -> None:
-        # grammar_input = "S -> i E t S \n"\
-                        # "S -> i E t S e S \n"\
-                        # "S -> a \n"\
-                        # "E -> b"
-        # grammar = NonContextGrammar(grammar_input)
-        # expected = {
-            # ("S", ("i", "E", "t", "S", "S'")),
-            # ("S", tuple("a")),
-            # ("S'", ("e", "S")),
-            # ("S'", tuple("&")),
-            # ("E", tuple("b"))
-        # }
-        # grammar._left_factoring()
-        # actual = grammar.get_transitions()
-        # self.assertEqual(actual, expected)
-
-        # grammar_input = "S -> a D C\n"\
-                        # "S -> c C C\n"\
-                        # "S -> a B C\n"\
-                        # "S -> d D C\n"\
-                        # "A -> a D\n"\
-                        # "A -> c C\n"\
-                        # "B -> a B\n"\
-                        # "B -> d D\n"\
-                        # "C -> e C\n"\
-                        # "C -> e A\n"\
-                        # "D -> f D\n"\
-                        # "D -> c B"
-        # grammar = NonContextGrammar(grammar_input)
-        # expected = {
-            # ("S", ("a", "S'")),
-            # ("S", ("c", "C", "C")),
-            # ("S", ("d", "D", "C")),
-            # ("S'", ("D", "C")),
-            # ("S'", ("B", "C")),
-            # ("A", ("a", "D")),
-            # ("A", ("c", "C")),
-            # ("B", ("a", "B")),
-            # ("B", ("d", "D")),
-            # ("C", ("e", "C'")),
-            # ("C'", tuple("C")),
-            # ("C'", tuple("A")),
-            # ("D", ("f", "D")),
-            # ("D", ("c", "B")),
-        # }
-
-        # grammar._left_factoring()
-        # actual = grammar.get_transitions()
-        # self.assertEqual(actual, expected)
-
-        # return None
-
-    # def test_replace_transitions(self) -> None:
-        # grammar_input = "S -> A C \n"\
-                        # "S -> B C \n"\
-                        # "A -> a D \n"\
-                        # "A -> c C"
-
-        # grammar = NonContextGrammar(grammar_input)
-        # grammar._replace_indirect_nd_transitions("S", "A")
-
-        # expected = {
-            # ("S", ("a", "D", "C")),
-            # ("S", ("c", "C", "C")),
-            # ("S", ("B", "C")),
-            # ("A", ("a", "D")),
-            # ("A", ("c", "C"))
-        # }
-        # actual = grammar.get_transitions()
-        # self.assertEqual(expected, actual)
-
-        # return None
+        return None
