@@ -5,6 +5,12 @@ from utils.model.Grammar import NonContextGrammar
 
 
 class NonContextGrammarTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.default_grammar_input = "S -> i E t S \n"\
+                                     "S -> i E t S e S \n"\
+                                     "S -> a \n"\
+                                     "E -> b"
+        self.default_grammar = NonContextGrammar(self.default_grammar_input)
 
     def test_grammar_input(self) -> None:
         grammar_input: str = "P -> K V C \n" \
@@ -265,29 +271,4 @@ class NonContextGrammarTests(unittest.TestCase):
         # actual = grammar.get_transitions()
         # self.assertEqual(expected, actual)
 
-        # return None
-
-    # def test_find_longest_prefix(self) -> None:
-        # grammar_input = "S -> i E t S \n"\
-                        # "S -> i E t S e S \n"\
-                        # "S -> a \n"\
-                        # "E -> b"
-        # production = [('a',), ('i', 'E', 't', 'S', 'e', 'S'), ('i', 'E', 't', 'S')]
-        # grammar = NonContextGrammar(grammar_input)
-
-        # expected = ('i', 'E', 't', 'S')
-        # actual = grammar._find_longest_common_prefix(production)
-        # self.assertEqual(expected, actual)
-
-        # production = [
-            # ('f', 'o', 'o'),
-            # ('f', 'o', 'o', 'b', 'a', 'r'),
-            # ('f', 'o', 'o', 't', 'b', 'a', 'l', 'l'),
-            # ('f', 'o', 'o', 't', 'b', 'a', 'g'),
-            # ('b', 'a', 'r'),
-        # ]
-
-        # expected = ('f', 'o', 'o', 't', 'b', 'a')
-        # actual = grammar._find_longest_common_prefix(production)
-        # self.assertEqual(expected, actual)
         # return None

@@ -1,5 +1,12 @@
-from typing import Set, List, Tuple, Dict, cast
 from copy import copy
+from typing import Dict, List, Set, Tuple, cast
+
+from utils.utils import (
+    add_factored_transition,
+    assemble_new_transition,
+    find_longest_common_prefix,
+    get_new_body,
+)
 
 
 class NonContextGrammar:
@@ -138,7 +145,7 @@ class NonContextGrammar:
         for production in productions:
             for production_to_replace in productions_to_replace:
                 if nt_to_replace in production_to_replace:
-                    new_body: Tuple[str, ...] = self._get_new_body(production, production_to_replace, nt_to_replace)
+                    new_body: Tuple[str, ...] = get_new_body(production, production_to_replace, nt_to_replace)
                     new_transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
                     self._transitions.add(new_transition)
 
@@ -148,70 +155,21 @@ class NonContextGrammar:
 
         return None
 
-    def _get_new_body(self,
-                      production: Tuple[str, ...],
-                      production_to_replace: Tuple[str, ...],
-                      nt_to_replace: str
-                    ) -> Tuple[str, ...]:
-        production_list = list(production)
-        production_to_replace_list = list(production_to_replace)
-        index = production_to_replace.index(nt_to_replace)
-        new_body: Tuple[str, ...] = tuple(production_list + production_to_replace_list[index + 1:])
-
-        return new_body
-
 
     def _remove_direct_non_determinism(self) -> None:
         new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
 
         for non_terminal in self._non_terminals:
             productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
-            longest_commom_prefix: Tuple[str] = self._find_longest_common_prefix(productions)
+            longest_commom_prefix: Tuple[str] = find_longest_common_prefix(productions)
 
             if longest_commom_prefix:
-                self._add_new_transition(non_terminal, longest_commom_prefix)
+                self._transitions.add(assemble_new_transition(non_terminal, longest_commom_prefix))
                 self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
 
         for transition in new_transitions:
             transition = cast(Tuple[str, Tuple[str, ...]], transition)
             self._transitions.add(transition)
-
-        return None
-
-
-    def _find_longest_common_prefix(self, productions: List[Tuple]) -> Tuple[str]:
-        prefix: Tuple = tuple()
-        maxsize: int = 0
-
-        for i in range(len(productions) - 1):
-            for j in range(i + 1, len(productions)):
-                t = self._common_prefix_size(productions[i], productions[j])
-                maxsize = max(maxsize, t)
-                if maxsize == t:
-                    prefix = productions[i][:maxsize]
-
-        return prefix
-
-
-    def _common_prefix_size(self, prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> int:
-        size: int = 0
-        i: int = 0
-        while i < min(len(prefix1), len(prefix2)):
-            if prefix1[i] == prefix2[i]:
-                size += 1
-                i += 1
-            else:
-                break
-
-        return size
-
-
-    def _add_new_transition(self, non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> None:
-        temp_list: List[str] = list(longest_commom_prefix)
-        temp_list.append(non_terminal + "'")
-        new_body: Tuple[str, ...] = tuple(temp_list)
-        transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
-        self._transitions.add(transition)
 
         return None
 
@@ -225,28 +183,7 @@ class NonContextGrammar:
         for production in productions:
             if set(prefix).issubset(production):
                 self._transitions.remove((non_terminal, production))
-                new_transitions = self._add_factored_transition(new_transitions, production, prefix, non_terminal)
-
-        return new_transitions
-
-
-    def _add_factored_transition(self,
-                                new_transitions: Set[Tuple[str, Tuple[str, ...]]],
-                                production: Tuple[str],
-                                prefix: Tuple[str, ...],
-                                non_terminal: str
-                            ) -> Set[Tuple[str, Tuple[str, ...]]]:
-        new_transition: List = list()
-        prefix_size: int = len(prefix)
-        new_production: Tuple[str, ...] = production[prefix_size:] if len(production[prefix_size:]) > 1 \
-                                                                    else tuple(production[prefix_size:])
-        if not(new_production):
-            new_production = tuple("&")
-
-        new_transition.append(non_terminal + "'")
-        new_transition.append(new_production)
-        new_transition_tuple: Tuple = tuple(new_transition)
-        new_transitions.add(new_transition_tuple)
+                new_transitions = add_factored_transition(new_transitions, production, prefix, non_terminal)
 
         return new_transitions
 
