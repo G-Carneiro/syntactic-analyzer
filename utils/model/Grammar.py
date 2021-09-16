@@ -124,7 +124,6 @@ class NonContextGrammar:
 
         return None
 
-
     def _get_productions_with_same_terminals(self) -> Dict[str, Set]:
         ways_to_get_to_terminal: Dict[str, Set] = {terminal: set() for terminal in self._terminals}
 
@@ -136,7 +135,6 @@ class NonContextGrammar:
                         ways_to_get_to_terminal[symbol].add(non_terminal)
 
         return dict(filter(lambda item: len(item[1]) > 1, ways_to_get_to_terminal.items()))
-
 
     def _replace_indirect_nd_transitions(self, non_terminal: str, nt_to_replace: str) -> None:
         productions: List[Tuple[str]] = list(self.get_all_productions_of_state(nt_to_replace))
@@ -155,7 +153,6 @@ class NonContextGrammar:
 
         return None
 
-
     def _remove_direct_non_determinism(self) -> None:
         new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
 
@@ -173,20 +170,18 @@ class NonContextGrammar:
 
         return None
 
-
     def _replace_transitions(self,
-                            new_transitions: Set[Tuple[str, Tuple[str, ...]]],
-                            productions: List[Tuple[str]], 
-                            prefix: Tuple[str, ...], 
-                            non_terminal: str
-                        ) -> Set[Tuple[str, Tuple[str, ...]]]:
+                             new_transitions: Set[Tuple[str, Tuple[str, ...]]],
+                             productions: List[Tuple[str]],
+                             prefix: Tuple[str, ...],
+                             non_terminal: str
+                             ) -> Set[Tuple[str, Tuple[str, ...]]]:
         for production in productions:
             if set(prefix).issubset(production):
                 self._transitions.remove((non_terminal, production))
                 new_transitions = add_factored_transition(new_transitions, production, prefix, non_terminal)
 
         return new_transitions
-
 
     def _set_first(self) -> None:
         self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
