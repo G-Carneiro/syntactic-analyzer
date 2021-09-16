@@ -16,6 +16,8 @@ class NonContextGrammar:
         # transition = (non_terminal, sequence of symbols)
         self._transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         self._set_grammar(grammar_input)
+        self._eliminate_left_recursion()
+        self._left_factoring()
         self._set_first()
         self._set_follow()
 
