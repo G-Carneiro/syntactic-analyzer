@@ -1,4 +1,6 @@
 from typing import Tuple, Set, List
+import os
+
 
 def find_longest_common_prefix(productions: List[Tuple]) -> Tuple[str]:
     prefix: Tuple = tuple()
@@ -25,6 +27,7 @@ def common_prefix_size(prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> in
             break
 
     return size
+
 
 def add_factored_transition(new_transitions: Set[Tuple[str, Tuple[str, ...]]],
                             production: Tuple[str, ...],
@@ -57,6 +60,7 @@ def get_new_body(production: Tuple[str, ...],
 
     return new_body
 
+
 def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> Tuple[Tuple[str, Tuple[str, ...]], str]:
     temp_list: List[str] = list(longest_commom_prefix)
     new_non_terminal: str = non_terminal + "'"
@@ -65,3 +69,43 @@ def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str,
     transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
 
     return transition, new_non_terminal
+
+
+def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_table) -> None:
+    latex_table: str = "\\begin{array}{|"
+    latex_table += "c|" * (len(terminals) + 1) + "}\n\t"
+    for terminal in sorted(terminals):
+        latex_table += f"& {check_symbol(terminal)} "
+
+    for non_terminal in sorted(non_terminals):
+        latex_table += f"\\\\\n\t" \
+                       f"\\hline \n\t" \
+                       f"{check_symbol(non_terminal)}"
+        for terminal in sorted(terminals):
+            try:
+                latex_table += f" & {check_symbol(analysis_table[non_terminal][terminal])}"
+            except KeyError:
+                latex_table += " &"
+
+    latex_table += "\n\\end{array}"
+
+    table_repr = open("../../docs/analysis_table.tex", "w")
+    table_repr.write(latex_table)
+    table_repr.close()
+
+    os.system("latex ../../docs/main.tex")
+    os.system("dvipdf main.dvi")
+    os.remove("main.dvi")
+
+    return None
+
+
+def check_symbol(symbol: str) -> str:
+    special_chars = ["#", "$", "%", "_", "{", "}", "&"]
+
+    if symbol == "\\":
+        return "\\backslash"
+    elif symbol in special_chars:
+        return ("\\" + symbol)
+
+    return symbol

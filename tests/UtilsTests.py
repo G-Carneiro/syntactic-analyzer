@@ -1,6 +1,7 @@
-from utils.utils import add_factored_transition, common_prefix_size, find_longest_common_prefix, get_new_body, assemble_new_transition
+from utils.utils import *
 
 import unittest
+
 
 class UtilsTests(unittest.TestCase):
     def test_common_prefix_size(self) -> None:
@@ -109,4 +110,9 @@ class UtilsTests(unittest.TestCase):
         expected = (('S', ('a', "S'")), "S'")
         actual = assemble_new_transition(non_terminal, longest_commom_prefix)
         self.assertEqual(expected, actual)
+        return None
+
+    def test_latex_table(self) -> None:
+        latex_analysis_table({"S", "A"}, {"a", "b"}, {})
+
         return None

@@ -2,6 +2,7 @@ from copy import copy
 from typing import Dict, List, Set, Tuple, cast
 
 from utils.utils import (
+    latex_analysis_table,
     add_factored_transition,
     assemble_new_transition,
     find_longest_common_prefix,
@@ -294,6 +295,9 @@ class NonContextGrammar:
             if "&" in first_of_alpha:
                 for terminal in self._get_follow_of_non_terminal(state):
                     table[state][terminal] = production
+
+        # TODO: remove
+        latex_analysis_table(self._non_terminals, self._terminals, table)
 
         return table
 
