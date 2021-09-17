@@ -72,13 +72,16 @@ def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str,
 
 
 def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_table) -> None:
-    latex_table: str = "\\begin{array}{|"
+    latex_table: str = "$\\begin{array}{|"
     latex_table += "c|" * (len(terminals) + 1) + "}\n\t"
+    latex_table += "\\hline \n\t"
     for terminal in sorted(terminals):
         latex_table += f"& {check_symbol(terminal)} "
 
+    latex_table += "\\\\"
+
     for non_terminal in sorted(non_terminals):
-        latex_table += f"\\\\\n\t" \
+        latex_table += f"\n\t" \
                        f"\\hline \n\t" \
                        f"{check_symbol(non_terminal)}"
         for terminal in sorted(terminals):
@@ -88,13 +91,16 @@ def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_
             except KeyError:
                 latex_table += " &"
 
-    latex_table += "\n\\end{array}"
+        latex_table += " \\\\"
 
-    table_repr = open("../../docs/analysis_table.tex", "w")
+    latex_table += "\n\t\\hline" \
+                   "\n\\end{array}$"
+
+    table_repr = open("docs/analysis_table.tex", "w")
     table_repr.write(latex_table)
     table_repr.close()
 
-    os.system("latex ../../docs/main.tex")
+    os.system("latex docs/main.tex")
     os.system("dvipdf main.dvi")
     os.remove("main.dvi")
 
@@ -102,10 +108,12 @@ def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_
 
 
 def check_symbol(symbol: str) -> str:
-    special_chars = ["#", "$", "%", "_", "{", "}", "&"]
+    special_chars = ["#", "$", "%", "_", "{", "}"]
 
     if symbol == "\\":
         return "\\backslash"
+    elif symbol == "&":
+        return "\\varepsilon "
     elif symbol in special_chars:
         return ("\\" + symbol)
 
