@@ -83,7 +83,8 @@ def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_
                        f"{check_symbol(non_terminal)}"
         for terminal in sorted(terminals):
             try:
-                latex_table += f" & {check_symbol(analysis_table[non_terminal][terminal])}"
+                string = analysis_table[non_terminal][terminal]
+                latex_table += f" & {check_str(string)}"
             except KeyError:
                 latex_table += " &"
 
@@ -109,3 +110,19 @@ def check_symbol(symbol: str) -> str:
         return ("\\" + symbol)
 
     return symbol
+
+
+def check_str(string: str) -> str:
+    output = ""
+    for symbol in string:
+        output += check_symbol(symbol)
+
+    return output
+
+
+def tuple_to_str(production: tuple) -> str:
+    output = ""
+    for symbol in production:
+        output += str(symbol)
+
+    return output

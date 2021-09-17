@@ -290,11 +290,11 @@ class NonContextGrammar:
             symbols = production[1]
             first_of_alpha: set = self._get_first_of_production(symbols)
             for terminal in first_of_alpha:
-                table[state][terminal] = production
+                table[state][terminal] = symbols
 
             if "&" in first_of_alpha:
                 for terminal in self._get_follow_of_non_terminal(state):
-                    table[state][terminal] = production
+                    table[state][terminal] = symbols
 
         # TODO: remove
         latex_analysis_table(self._non_terminals, self._terminals, table)
