@@ -12,6 +12,7 @@ class NonContextGrammarTests(unittest.TestCase):
                                      "E -> b"
         self.default_grammar = NonContextGrammar(self.default_grammar_input)
 
+    # @unittest.skip("")
     def test_grammar_input(self) -> None:
         grammar_input: str = "P -> K V C \n" \
                              "K -> c K \n" \
@@ -107,6 +108,7 @@ class NonContextGrammarTests(unittest.TestCase):
     Left Factoring Tests
     """
 
+    # @unittest.skip("")
     def test_get_productions_with_same_terminals(self) -> None:
         grammar_input = "S -> A C\n"\
                         "S -> B C\n"\
@@ -133,6 +135,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_replace_indirect_nd_transitions(self) -> None:
         grammar_input = "S -> A C\n"\
                         "S -> B C\n"\
@@ -163,6 +166,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_replace_indirect_with_direct_non_determinism(self) -> None:
         grammar_input = "S -> A C\n"\
                         "S -> B C\n"\
@@ -194,6 +198,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_remove_direct_non_determinism(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -246,6 +251,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_left_factoring(self) -> None:
         grammar_input = "S -> i E t S \n"\
                         "S -> i E t S e S \n"\
@@ -295,6 +301,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_replace_transitions(self) -> None:
         grammar_input = "S -> A C \n"\
                         "S -> B C \n"\
