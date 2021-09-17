@@ -57,22 +57,6 @@ class NonContextGrammarTests(unittest.TestCase):
                         "B -> B b"
 
         grammar = NonContextGrammar(grammar_input)
-        expected_productions = {("S", ("A", "a", "S'")),
-                                ("S", ("c", "S'")),
-                                ("S'", tuple("&")),
-                                ("S'", ("c", "S'")),
-                                ("A", ("B", "b", "A'")),
-                                ("A", ("a", "A'")),
-                                ("A", ("c", "S'", "a", "A'")),
-                                ("A'", ("a", "S'", "a", "A'")),
-                                ("A'", tuple("&")),
-                                ("B", ("c", "S'", "c", "B'")),
-                                ("B", ("a", "A'", "a", "S'", "c", "B'")),
-                                ("B", ("c", "S'", "a", "A'", "a", "S'", "c", "B'")),
-                                ("B'", ("b", "B'")),
-                                ("B'", ("b", "A'", "a", "S'", "c", "B'")),
-                                ("B'", tuple("&"))
-                                }
         expected_productions = {("A", ("S", "a")),
                                 ("A", ("B", "b")),
                                 ("A", tuple("a")),
