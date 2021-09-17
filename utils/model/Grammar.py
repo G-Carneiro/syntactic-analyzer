@@ -242,7 +242,7 @@ class NonContextGrammar:
     def _set_follow_of_non_terminal(self, non_terminal: str) -> None:
         if (non_terminal != self._initial_symbol) and (self._follow[non_terminal]):
             return None
-        productions: Set[Tuple[str, Tuple[str]]] = set()
+        productions: Set[Tuple[str, Tuple[str, ...]]] = set()
         for production in self._transitions:
             if non_terminal in production[1]:
                 productions.add(production)
