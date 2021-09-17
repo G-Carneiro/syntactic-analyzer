@@ -249,7 +249,7 @@ class NonContextGrammar:
 
         for production in productions:
             state: str = production[0]
-            symbols: Tuple[str] = production[1]
+            symbols: Tuple[str, ...] = production[1]
             for i in range(len(symbols)):
                 actual_symbol = symbols[i]
                 if actual_symbol == non_terminal:
