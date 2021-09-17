@@ -57,10 +57,11 @@ def get_new_body(production: Tuple[str, ...],
 
     return new_body
 
-def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> Tuple[str, Tuple[str, ...]]:
+def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> Tuple[Tuple[str, Tuple[str, ...]], str]:
     temp_list: List[str] = list(longest_commom_prefix)
-    temp_list.append(non_terminal + "'")
+    new_non_terminal: str = non_terminal + "'"
+    temp_list.append(new_non_terminal)
     new_body: Tuple[str, ...] = tuple(temp_list)
     transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
 
-    return transition
+    return transition, new_non_terminal
