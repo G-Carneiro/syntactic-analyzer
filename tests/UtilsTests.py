@@ -94,19 +94,19 @@ class UtilsTests(unittest.TestCase):
     def test_assemble_new_transition(self) -> None:
         non_terminal = "S"
         longest_commom_prefix = ('i', 'E', 't', 'S')
-        expected = ('S', ('i', 'E', 't', 'S', "S'"))
+        expected = (('S', ('i', 'E', 't', 'S', "S'")), "S'")
         actual = assemble_new_transition(non_terminal, longest_commom_prefix)
         self.assertEqual(expected, actual)
 
         non_terminal = "C"
         longest_commom_prefix = ('e',)
-        expected = ('C', ('e', "C'"))
+        expected = (('C', ('e', "C'")), "C'")
         actual = assemble_new_transition(non_terminal, longest_commom_prefix)
         self.assertEqual(expected, actual)
 
         non_terminal = "S"
         longest_commom_prefix = ('a',)
-        expected = ('S', ('a', "S'"))
+        expected = (('S', ('a', "S'")), "S'")
         actual = assemble_new_transition(non_terminal, longest_commom_prefix)
         self.assertEqual(expected, actual)
         return None
