@@ -72,7 +72,8 @@ def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str,
 
 
 def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_table) -> None:
-    latex_table: str = "$\\begin{array}{|"
+    latex_table: str = "$\n" \
+                       "\\begin{array}{|"
     latex_table += "c|" * (len(terminals) + 1) + "}\n\t"
     latex_table += "\\hline \n\t"
     for terminal in sorted(terminals):
@@ -94,7 +95,8 @@ def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_
         latex_table += " \\\\"
 
     latex_table += "\n\t\\hline" \
-                   "\n\\end{array}$"
+                   "\n\\end{array}\n" \
+                   "$"
 
     table_repr = open("docs/analysis_table.tex", "w")
     table_repr.write(latex_table)

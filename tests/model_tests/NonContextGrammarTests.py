@@ -169,12 +169,12 @@ class NonContextGrammarTests(unittest.TestCase):
         self.default_grammar1._set_first()
         self.default_grammar1._set_follow()
         table = self.default_grammar1.construct_analysis_table()
-        for non_terminal in self.default_grammar1.get_non_terminals():
-            for terminal in self.default_grammar1.get_terminals():
-                try:
-                    print(f"table[{non_terminal}][{terminal}] = {table[non_terminal][terminal]}")
-                except KeyError:
-                    pass
+        # for non_terminal in self.default_grammar1.get_non_terminals():
+        #     for terminal in self.default_grammar1.get_terminals():
+        #         try:
+        #             print(f"table[{non_terminal}][{terminal}] = {table[non_terminal][terminal]}")
+        #         except KeyError:
+        #             pass
         return None
     """
     Left Factoring Tests
