@@ -306,7 +306,7 @@ class NonContextGrammar:
                 first.add(symbol)
                 break
 
-            first.add(self._get_first_of_non_terminal(symbol))
+            first |= self._get_first_of_non_terminal(symbol)
             if ("&" in first) and (i <= size - 1):
                 first.remove("&")
 

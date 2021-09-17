@@ -163,6 +163,19 @@ class NonContextGrammarTests(unittest.TestCase):
         self.assertEqual(self.default_grammar0._get_first_of_production(("i", "E", "t", "S")),
                          expected_first)
 
+        return None
+
+    def test_table(self) -> None:
+        self.default_grammar1._set_first()
+        self.default_grammar1._set_follow()
+        table = self.default_grammar1.construct_analysis_table()
+        for non_terminal in self.default_grammar1.get_non_terminals():
+            for terminal in self.default_grammar1.get_terminals():
+                try:
+                    print(f"table[{non_terminal}][{terminal}] = {table[non_terminal][terminal]}")
+                except KeyError:
+                    pass
+        return None
     """
     Left Factoring Tests
     """
