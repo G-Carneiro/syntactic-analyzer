@@ -6,11 +6,32 @@ from utils.model.Grammar import NonContextGrammar
 
 class NonContextGrammarTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.default_grammar_input = "S -> i E t S \n"\
+        self.default_grammar_input0 = "S -> i E t S \n"\
                                      "S -> i E t S e S \n"\
                                      "S -> a \n"\
                                      "E -> b"
-        self.default_grammar = NonContextGrammar(self.default_grammar_input)
+        self.default_grammar0 = NonContextGrammar(self.default_grammar_input0)
+        grammar_input1: str = "P -> K V C \n" \
+                              "K -> c K \n" \
+                              "K -> & \n" \
+                              "V -> v V \n" \
+                              "V -> F \n" \
+                              "F -> f P ; F \n" \
+                              "F -> & \n" \
+                              "C -> b V C e \n" \
+                              "C -> com ; C \n" \
+                              "C -> &"
+        self.default_grammar1 = NonContextGrammar(grammar_input1)
+        grammar_input2: str = "S -> A B \n" \
+                              "A -> a B A \n" \
+                              "A -> & \n" \
+                              "B -> C D \n" \
+                              "C -> b D C \n" \
+                              "C -> & \n" \
+                              "D -> c S c \n" \
+                              "D -> d"
+
+        self.default_grammar2 = NonContextGrammar(grammar_input2)
 
     # @unittest.skip("")
     def test_grammar_input(self) -> None:
@@ -77,31 +98,63 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    @unittest.skip("")
-    def test_first_and_follow(self) -> None:
-        grammar_input = "S -> A B \n"\
-                        "A -> a B A \n"\
-                        "A -> & \n"\
-                        "B -> C D \n"\
-                        "C -> b D C \n"\
-                        "C -> & \n"\
-                        "D -> c S c \n"\
-                        "D -> d"
-        grammar = NonContextGrammar(grammar_input)
+    # @unittest.skip("")
+    def test_first(self) -> None:
+        # grammar_input = "S -> A B \n"\
+        #                 "A -> a B A \n"\
+        #                 "A -> & \n"\
+        #                 "B -> C D \n"\
+        #                 "C -> b D C \n"\
+        #                 "C -> & \n"\
+        #                 "D -> c S c \n"\
+        #                 "D -> d"
+        # grammar = NonContextGrammar(grammar_input)
+        # expected_first = {"S": {"a", "b", "c", "d"},
+        #                   "A": {"a", "&"},
+        #                   "B": {"b", "c", "d"},
+        #                   "C": {"b", "&"},
+        #                   "D": {"c", "d"}}
+        # grammar._convert_grammar()
+        # self.assertEqual(grammar.get_first(), expected_first)
+        self.default_grammar1._set_first()
+        expected_first = {"P": {"c", "v", "f", "b", "com", "&"},
+                          "K": {"c", "&"},
+                          "V": {"v", "f", "&"},
+                          "F": {"f", "&"},
+                          "C": {"b", "com", "&"}
+                          }
+        self.assertEqual(self.default_grammar1.get_first(), expected_first)
         expected_first = {"S": {"a", "b", "c", "d"},
                           "A": {"a", "&"},
                           "B": {"b", "c", "d"},
                           "C": {"b", "&"},
-                          "D": {"c", "d"}}
+                          "D": {"c", "d"}
+                          }
+        self.default_grammar2._set_first()
+        self.assertEqual(self.default_grammar2.get_first(), expected_first)
+
+        return None
+
+    # @unittest.skip("")
+    def test_follow(self) -> None:
         expected_follow = {"S": {"$", "c"},
                            "A": {"b", "c", "d"},
                            "B": {"$", "a", "b", "c", "d"},
                            "C": {"c", "d"},
                            "D": {"$", "a", "b", "c", "d"}}
-        self.assertEqual(grammar.get_first(), expected_first)
-        self.assertEqual(grammar.get_follow(), expected_follow)
+        self.default_grammar2._set_first()
+        self.default_grammar2._set_follow()
+        self.assertEqual(self.default_grammar2.get_follow(), expected_follow)
 
-        return None
+        self.default_grammar1._set_first()
+        self.default_grammar1._set_follow()
+        expected_follow = {"P": {"$", ";"},
+                           "K": {"v", "f", "b", ";", "com", "$"},
+                           "V": {"b", "e", ";", "com", "$"},
+                           "F": {"b", "e", ";", "com", "$"},
+                           "C": {";", "e", "$"}
+                           }
+        self.assertEqual(self.default_grammar1.get_follow(), expected_follow)
 
     """
     Left Factoring Tests

@@ -220,7 +220,7 @@ class NonContextGrammar:
                     self._first[non_terminal] |= first_of_symbol - {"&"}
                     if "&" not in first_of_symbol:
                         break
-                    elif i == len(production):
+                    elif i == len(production) - 1:
                         self._first[non_terminal].add("&")
 
         return None
@@ -259,10 +259,20 @@ class NonContextGrammar:
                     elif symbols[i + 1] in self._terminals:
                         self._follow[actual_symbol].add(symbols[i + 1])
                     else:
-                        # TODO: talvez tenha problemas
-                        self._follow[actual_symbol] |= self._get_first_of_non_terminal(symbols[i + 1]) - {"&"}
-                        if ("&" in self._get_first_of_non_terminal(symbols[i + 1])):
+                        first_of_next_symbol = self._get_first_of_non_terminal(symbols[i + 1])
+                        self._follow[actual_symbol] |= first_of_next_symbol - {"&"}
+                        count = i + 1
+                        while "&" in first_of_next_symbol and count <= len(symbols) - 2:
+                            next_symbol = symbols[count + 1]
+                            if next_symbol in self._terminals:
+                                break
+                            first_of_next_symbol = self._get_first_of_non_terminal(symbols[count + 1])
+                            self._follow[actual_symbol] |= first_of_next_symbol - {"&"}
+                            count += 1
+
+                        if "&" in first_of_next_symbol:
                             self._follow[actual_symbol] |= self._get_follow_of_non_terminal(state)
+
         return None
 
     def _get_follow_of_non_terminal(self, non_terminal: str) -> Set[str]:
