@@ -45,7 +45,6 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    # FIXME: Erro não determinístico ocorrendo
     # @unittest.skip("")
     def test_left_recursion(self) -> None:
         grammar_input = "S -> S c \n" \
