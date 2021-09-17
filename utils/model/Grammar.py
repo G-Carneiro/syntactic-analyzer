@@ -282,7 +282,24 @@ class NonContextGrammar:
         return self._follow[non_terminal]
 
     def construct_analysis_table(self):
-        pass
+        productions = list(self._transitions)
+        for production in productions:
+            first_of_alpha: set = self._get_first_of_production(production[1])
+
+    def _get_first_of_production(self, production: Tuple) -> Set[str]:
+        first = set()
+        size = len(production)
+        for i in range(size):
+            symbol = production[i]
+            if symbol in self._terminals:
+                first.add(symbol)
+                break
+
+            first.add(self._get_first_of_non_terminal(symbol))
+            if ("&" in first) and (i <= size - 1):
+                first.remove("&")
+
+        return first
 
     def __repr__(self) -> str:
         output: str = ""

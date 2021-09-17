@@ -156,6 +156,13 @@ class NonContextGrammarTests(unittest.TestCase):
                            }
         self.assertEqual(self.default_grammar1.get_follow(), expected_follow)
 
+        return None
+
+    def test_get_first_of_production(self) -> None:
+        expected_first = {"i"}
+        self.assertEqual(self.default_grammar0._get_first_of_production(("i", "E", "t", "S")),
+                         expected_first)
+
     """
     Left Factoring Tests
     """
