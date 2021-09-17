@@ -160,19 +160,24 @@ class NonContextGrammar:
 
     def _remove_direct_non_determinism(self) -> None:
         new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
+        new_non_terminals_to_add = set()
 
         for non_terminal in self._non_terminals:
             productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
             longest_commom_prefix: Tuple[str] = find_longest_common_prefix(productions)
 
             if longest_commom_prefix:
-                self._transitions.add(assemble_new_transition(non_terminal, longest_commom_prefix))
+                transition_to_add, non_terminal_to_add = assemble_new_transition(non_terminal, longest_commom_prefix)
+                new_non_terminals_to_add.add(non_terminal_to_add)
+                self._transitions.add(transition_to_add)
                 self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
 
         for transition in new_transitions:
             transition = cast(Tuple[str, Tuple[str, ...]], transition)
             self._transitions.add(transition)
 
+        for non_terminal in new_non_terminals_to_add:
+            self._non_terminals.add(non_terminal)
         return None
 
     def _replace_transitions(self,
