@@ -30,16 +30,36 @@ class NonContextGrammarTests(unittest.TestCase):
                               "C -> & \n" \
                               "D -> c S c \n" \
                               "D -> d"
-
         self.default_grammar2 = NonContextGrammar(grammar_input2)
+        grammar_input3: str = "S -> A C\n"\
+                            "S -> B C\n"\
+                            "A -> a D\n"\
+                            "A -> c C\n"\
+                            "B -> a B\n"\
+                            "B -> d D\n"\
+                            "C -> e C\n"\
+                            "C -> e A\n"\
+                            "D -> f D\n"\
+                            "D -> C B"
+        self.grammar3 = NonContextGrammar(grammar_input3)
 
-    @unittest.skip("")
+    # TODO: Comportamento estranho na grammar0, grammar3
+    # @unittest.skip("")
     def test_convert_grammar(self) -> None:
-        self.default_grammar0._eliminate_left_recursion()
-        self.default_grammar0._left_factoring()
-        self.default_grammar0._set_first()
-        # print(self.default_grammar0.get_transitions())
-        self.default_grammar0._set_follow()
+        grammar_input = "S -> S c \n" \
+                        "S -> A a \n" \
+                        "S -> c \n" \
+                        "A -> S a \n" \
+                        "A -> B b \n" \
+                        "A -> a \n" \
+                        "B -> S c \n" \
+                        "B -> B b"
+
+        grammar = NonContextGrammar(grammar_input)
+        grammar._eliminate_left_recursion()
+        grammar._left_factoring()
+        grammar._set_first()
+        grammar._set_follow()
         return None
 
     # @unittest.skip("")
@@ -166,20 +186,23 @@ class NonContextGrammarTests(unittest.TestCase):
                            }
         self.assertEqual(self.default_grammar1.get_follow(), expected_follow)
 
-        # grammar_input = "S -> a S'\n"\
+        # grammar_input = "S -> a F\n"\
                         # "S -> c C C\n"\
                         # "S -> d D C\n"\
-                        # "S' -> D C\n"\
-                        # "S' -> B C\n"\
+                        # "F -> D C\n"\
+                        # "F -> B C\n"\
                         # "A -> a D\n"\
                         # "A -> c C\n"\
                         # "B -> d D\n"\
-                        # "C -> e C'\n"\
-                        # "C' -> c\n"\
-                        # "C' -> A\n"\
+                        # "C -> e E\n"\
+                        # "E -> C\n"\
+                        # "E -> A\n"\
                         # "D -> f D\n"\
                         # "D -> C B"
         # grammar = NonContextGrammar(grammar_input)
+        # self.grammar3._eliminate_left_recursion()
+        # self.grammar3._left_factoring()
+        # self.assertEqual(grammar.get_transitions(), self.grammar3.get_transitions())
         # grammar._set_first()
         # grammar._set_follow()
 
@@ -193,7 +216,7 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
-    @unittest.skip("")
+    # @unittest.skip("")
     def test_table(self) -> None:
         self.default_grammar1._set_first()
         self.default_grammar1._set_follow()
@@ -381,7 +404,7 @@ class NonContextGrammarTests(unittest.TestCase):
                         "D -> f D\n"\
                         "D -> C B"
         grammar = NonContextGrammar(grammar_input)
-        grammar._left_factoring()
+        # grammar._left_factoring()
         expected = {
             ("S", ("a", "F")),
             ("S", ("c", "C", "C")),
@@ -398,8 +421,11 @@ class NonContextGrammarTests(unittest.TestCase):
             ("D", ("f", "D")),
             ("D", ("C", "B"))
         }
-        actual = grammar.get_transitions()
-        self.assertEqual(expected, actual)
+        for _ in range(10000):
+            cp = copy(grammar)
+            cp._left_factoring()
+            actual = cp.get_transitions()
+            self.assertEqual(expected, actual)
         return None
 
     # @unittest.skip("")
@@ -421,5 +447,53 @@ class NonContextGrammarTests(unittest.TestCase):
         }
         actual = grammar.get_transitions()
         self.assertEqual(expected, actual)
+
+        return None
+
+    def test_recursion_and_factoring(self) -> None:
+        grammar_input = "S -> S c \n" \
+                        "S -> A a \n" \
+                        "S -> c \n" \
+                        "A -> S a \n" \
+                        "A -> B b \n" \
+                        "A -> a \n" \
+                        "B -> S c \n" \
+                        "B -> B b"
+
+        grammar = NonContextGrammar(grammar_input)
+        grammar._eliminate_left_recursion()
+        expected_productions = {("A", ("S", "a")),
+                                ("A", ("B", "b")),
+                                ("A", tuple("a")),
+                                ("B", ("S", "c", "C")),
+                                ("C", ("b", "C")),
+                                ("C", tuple("&")),
+                                ("S", ("a", "a", "D")),
+                                ("S", ("c", "D")),
+                                ("D", ("c", "D")),
+                                ("D", ("a", "a", "D")),
+                                ("D", ("c", "C", "b", "a", "D")),
+                                ("D", tuple("&"))
+                                }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected_productions, actual)
+        grammar._left_factoring()
+        expected_productions = {("A", ("S", "a")),
+                                ("A", ("B", "b")),
+                                ("A", tuple("a")),
+                                ("B", ("S", "c", "C")),
+                                ("C", ("b", "C")),
+                                ("C", tuple("&")),
+                                ("S", ("a", "a", "D")),
+                                ("S", ("c", "D")),
+                                ("D", ("c", "E")),
+                                ("D", ("a", "a", "D")),
+                                # ("D", ("c", "C", "b", "a", "D")),
+                                ("D", tuple("&")),
+                                ("E", tuple("D")),
+                                ("E", ("C", "b", "a", "D"))
+                                }
+        actual = grammar.get_transitions()
+        self.assertEqual(expected_productions, actual)
 
         return None

@@ -31,9 +31,10 @@ class Controller:
         except:
             self._log("Algo deu errado ao adicionar a definição da gramática")
         else:
-            # grammar.convert_grammar()
+            grammar.convert_grammar()
             table = grammar.construct_analysis_table()
             self._view.insert_text(idd="analysis_table", text=str(table))
+            self._log("Gramática Criada Com Sucesso")
         return None
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:
