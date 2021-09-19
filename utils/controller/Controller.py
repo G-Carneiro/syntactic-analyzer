@@ -4,6 +4,7 @@ from ..view.View import View
 from ..view.Form import Form
 
 from ..model.Grammar import NonContextGrammar
+from ..model.PushdownAutomata import PushDownAutomata
 
 class Controller:
     def __init__(self) -> None:
@@ -27,23 +28,31 @@ class Controller:
     def _handle_add_grammar_input_callback(self, response: Dict) -> None:
         try:
             grammar_input: str = response["text_entries"]["grammar_input"][0:-1]
-            grammar = NonContextGrammar(grammar_input)
+            self.grammar = NonContextGrammar(grammar_input)
         except:
             self._log("Algo deu errado ao adicionar a definição da gramática")
         else:
-            grammar.convert_grammar()
-            table = grammar.construct_analysis_table()
+            self.grammar.convert_grammar()
+            table: Dict = self.grammar.construct_analysis_table()
             self._view.insert_text(idd="analysis_table", text=str(table))
+            initial_state: str = self.grammar.get_initial_state()
+            self.pd_automata: PushDownAutomata = PushDownAutomata(initial_state, table)
             self._log("Gramática Criada Com Sucesso")
         return None
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:
         try:
-            print(response)
+            token_table = list(response["text_entries"]["token_input"])[:-1]
+            # ["a", " ", "b", "\n"]
+            print(token_table)
         except:
             self._log("Algo deu errado ao adicionar a tabela de tokens")
         else:
-            print("else")
+            is_accepted: bool = self.pd_automata.run(token_table)
+            if is_accepted:
+                self._log("Aceito")
+            else:
+                self._log("Não aceito")
         return None
 
     def _log(self, message: str) -> None:

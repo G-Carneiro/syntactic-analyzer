@@ -44,6 +44,9 @@ class NonContextGrammar:
 
         return None
 
+    def get_initial_state(self) -> str:
+        return self._initial_symbol
+
     def get_terminals(self) -> Set[str]:
         return self._terminals
 
@@ -127,6 +130,7 @@ class NonContextGrammar:
 
     def _replace_indirect_with_direct_non_determinism(self) -> None:
         return None
+
     # def _replace_indirect_with_direct_non_determinism(self) -> None:
         # productions_with_same_terminals: Dict[str, Set] = self._get_productions_with_same_terminals()
         # print(productions_with_same_terminals)
