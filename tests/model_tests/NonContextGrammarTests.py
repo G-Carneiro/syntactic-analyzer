@@ -33,12 +33,13 @@ class NonContextGrammarTests(unittest.TestCase):
 
         self.default_grammar2 = NonContextGrammar(grammar_input2)
 
+    @unittest.skip("")
     def test_convert_grammar(self) -> None:
         self.default_grammar0._eliminate_left_recursion()
         self.default_grammar0._left_factoring()
         self.default_grammar0._set_first()
         # print(self.default_grammar0.get_transitions())
-        # self.default_grammar0._set_follow()
+        self.default_grammar0._set_follow()
         return None
 
     # @unittest.skip("")
@@ -89,16 +90,17 @@ class NonContextGrammarTests(unittest.TestCase):
         expected_productions = {("A", ("S", "a")),
                                 ("A", ("B", "b")),
                                 ("A", tuple("a")),
-                                ("B", ("S", "c", "B'")),
-                                ("B'", ("b", "B'")),
-                                ("B'", tuple("&")),
-                                ("S", ("a", "a", "S'")),
-                                ("S", ("c", "S'")),
-                                ("S'", ("c", "S'")),
-                                ("S'", ("a", "a", "S'")),
-                                ("S'", ("c", "B'", "b", "a", "S'")),
-                                ("S'", tuple("&"))
+                                ("B", ("S", "c", "C")),
+                                ("C", ("b", "C")),
+                                ("C", tuple("&")),
+                                ("S", ("a", "a", "D")),
+                                ("S", ("c", "D")),
+                                ("D", ("c", "D")),
+                                ("D", ("a", "a", "D")),
+                                ("D", ("c", "C", "b", "a", "D")),
+                                ("D", tuple("&"))
                                 }
+
         for _ in range(10000):
             aux_grammar = copy(grammar)
             aux_grammar._eliminate_left_recursion()
@@ -183,6 +185,7 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
+    # @unittest.skip("")
     def test_get_first_of_production(self) -> None:
         expected_first = {"i"}
         self.assertEqual(self.default_grammar0._get_first_of_production(("i", "E", "t", "S")),
@@ -190,6 +193,7 @@ class NonContextGrammarTests(unittest.TestCase):
 
         return None
 
+    @unittest.skip("")
     def test_table(self) -> None:
         self.default_grammar1._set_first()
         self.default_grammar1._set_follow()

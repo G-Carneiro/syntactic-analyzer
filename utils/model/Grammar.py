@@ -18,8 +18,8 @@ class NonContextGrammar:
         self._transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         self._set_grammar(grammar_input)
 
-        # temp_states = self._non_terminals - {"S"}
-        # self._next_new_state = chr(ord(max(temp_states)) + 1)
+        temp_states = self._non_terminals - {"S"}
+        self._next_new_state = chr(ord(max(temp_states)) + 1)
 
     def convert_grammar(self) -> None:
         self._eliminate_left_recursion()
@@ -79,7 +79,14 @@ class NonContextGrammar:
 
     def _eliminate_immediate_left_recursion(self, state: str) -> None:
         if self.have_immediate_left_recursion(state):
-            new_state: str = state + "\'"
+            # new_state: str = state + "\'"
+            if self._next_new_state != "S":
+                new_state: str = self._next_new_state
+                self._next_new_state = chr(ord(self._next_new_state) + 1)
+            else:
+                new_state: str = self._next_new_state
+                self._next_new_state = chr(ord(self._next_new_state) + 1)
+
             self._non_terminals.add(new_state)
             epsilon_production = (new_state, tuple("&"))
             self._transitions.add(epsilon_production)
