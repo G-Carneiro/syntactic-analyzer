@@ -42,9 +42,9 @@ class Controller:
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:
         try:
-            token_table = list(response["text_entries"]["token_input"])[:-1]
+            token_table = response["text_entries"]["token_input"].split()
             # ["a", " ", "b", "\n"]
-            print(token_table)
+            # print(token_table)
         except:
             self._log("Algo deu errado ao adicionar a tabela de tokens")
         else:
