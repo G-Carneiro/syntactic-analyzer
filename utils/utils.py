@@ -1,4 +1,4 @@
-from typing import Tuple, Set, List
+from typing import Tuple, Set, List, Dict
 import os
 
 
@@ -133,5 +133,22 @@ def tuple_to_str(production: tuple) -> str:
     output = ""
     for symbol in production:
         output += str(symbol)
+
+    return output
+
+
+def table_to_str(table: Dict[str, Dict[str, Tuple[str, ...]]],
+                 non_terminals: Set[str],
+                 terminals: Set[str]) -> str:
+    terminals -= {"&"}
+    terminals.add("$")
+    output: str = ""
+    for non_terminal in sorted(non_terminals):
+        for terminal in sorted(terminals):
+            try:
+                production: str = tuple_to_str(table[non_terminal][terminal])
+                output += f"M[{non_terminal}][{terminal}] = {production} \n"
+            except KeyError:
+                pass
 
     return output

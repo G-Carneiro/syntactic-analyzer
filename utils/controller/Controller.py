@@ -6,6 +6,8 @@ from ..view.Form import Form
 from ..model.Grammar import NonContextGrammar
 from ..model.PushdownAutomata import PushDownAutomata
 
+from ..utils import table_to_str
+
 class Controller:
     def __init__(self) -> None:
         self._view = View()
@@ -34,7 +36,8 @@ class Controller:
         else:
             self.grammar.convert_grammar()
             table: Dict = self.grammar.construct_analysis_table()
-            self._view.insert_text(idd="analysis_table", text=str(table))
+            table_repr = table_to_str(table, self.grammar.get_non_terminals(), self.grammar.get_terminals())
+            self._view.insert_text(idd="analysis_table", text=table_repr)
             initial_state: str = self.grammar.get_initial_state()
             self.pd_automata: PushDownAutomata = PushDownAutomata(initial_state, table)
             self._log("Gramática Criada Com Sucesso")
