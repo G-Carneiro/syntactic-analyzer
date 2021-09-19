@@ -54,7 +54,7 @@ class View(Tk):
         return None
 
     def _create_grammar_input_form(self, parent: Container) -> None:
-        idd: str = "grammar"
+        idd: str = "grammar_input"
         new_form: Form = Form(parent=parent, label="Grammar Input", row=1)
         new_form.add_text_entry(idd=idd, height=6)
         new_form.add_button(idd=idd, label="Enter Grammar", row=1)
