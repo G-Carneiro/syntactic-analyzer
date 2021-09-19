@@ -12,12 +12,15 @@ class PushDownAutomata:
 
     def run(self, sentence: List[str]) -> bool:
         sentence.append("$")
-        for symbol in sentence:
+        while sentence:
+            symbol = sentence[0]
             top = self.top_of_stack()
             if (top == "$" == symbol):
+                del sentence[0]
                 return True
             elif top == symbol:
                 self._stack.pop()
+                del sentence[0]
             elif top in self._states:
                 try:
                     production = self._analysis_table[top][symbol]
@@ -29,6 +32,8 @@ class PushDownAutomata:
 
                 except KeyError:
                     return False
+            else:
+                return False
 
         return False
 
