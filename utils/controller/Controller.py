@@ -32,7 +32,12 @@ class Controller:
         return None
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:
-        print(response)
+        try:
+            print(response)
+        except:
+            self._log("Algo deu errado ao adicionar a tabela de tokens")
+        else:
+            print("else")
         return None
 
     def _log(self, message: str) -> None:
