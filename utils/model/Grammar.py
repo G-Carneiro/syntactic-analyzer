@@ -84,6 +84,7 @@ class NonContextGrammar:
                 new_state: str = self._next_new_state
                 self._next_new_state = chr(ord(self._next_new_state) + 1)
             else:
+                self._next_new_state = chr(ord(self._next_new_state) + 1)
                 new_state: str = self._next_new_state
                 self._next_new_state = chr(ord(self._next_new_state) + 1)
 
@@ -127,7 +128,7 @@ class NonContextGrammar:
         productions_with_same_terminals: Dict[str, Set] = self._get_productions_with_same_terminals()
 
         for _, non_terminals in productions_with_same_terminals.items():
-            for non_terminal in self._non_terminals:
+            for non_terminal in sorted(self._non_terminals):
                 productions = self.get_all_productions_of_state(non_terminal)
                 sum_ = 0
                 for production in productions:
@@ -143,7 +144,7 @@ class NonContextGrammar:
     def _get_productions_with_same_terminals(self) -> Dict[str, Set]:
         ways_to_get_to_terminal: Dict[str, Set] = {terminal: set() for terminal in self._terminals}
 
-        for non_terminal in self._non_terminals:
+        for non_terminal in sorted(self._non_terminals):
             productions = self.get_all_productions_of_state(non_terminal)
             for production in productions:
                 for symbol in production:
@@ -173,15 +174,23 @@ class NonContextGrammar:
         new_transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         new_non_terminals_to_add = set()
 
-        for non_terminal in self._non_terminals:
+        for non_terminal in sorted(self._non_terminals):
             productions: List[Tuple[str]] = list(self.get_all_productions_of_state(non_terminal))
             longest_commom_prefix: Tuple[str] = find_longest_common_prefix(productions)
 
             if longest_commom_prefix:
-                transition_to_add, non_terminal_to_add = assemble_new_transition(non_terminal, longest_commom_prefix)
+                if self._next_new_state != "S":
+                    non_terminal_to_add: str = self._next_new_state
+                    self._next_new_state = chr(ord(self._next_new_state) + 1)
+                else:
+                    self._next_new_state = chr(ord(self._next_new_state) + 1)
+                    non_terminal_to_add: str = self._next_new_state
+                    self._next_new_state = chr(ord(self._next_new_state) + 1)
+
+                transition_to_add = assemble_new_transition(non_terminal, longest_commom_prefix, non_terminal_to_add)
                 new_non_terminals_to_add.add(non_terminal_to_add)
                 self._transitions.add(transition_to_add)
-                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal)
+                self._replace_transitions(new_transitions, productions, longest_commom_prefix, non_terminal, non_terminal_to_add)
 
         for transition in new_transitions:
             transition = cast(Tuple[str, Tuple[str, ...]], transition)
@@ -195,18 +204,19 @@ class NonContextGrammar:
                              new_transitions: Set[Tuple[str, Tuple[str, ...]]],
                              productions: List[Tuple[str]],
                              prefix: Tuple[str, ...],
-                             non_terminal: str
+                             non_terminal: str,
+                             new_non_terminal: str
                              ) -> Set[Tuple[str, Tuple[str, ...]]]:
         for production in productions:
             if set(prefix).issubset(production):
                 self._transitions.remove((non_terminal, production))
-                new_transitions = add_factored_transition(new_transitions, production, prefix, non_terminal)
+                new_transitions = add_factored_transition(new_transitions, production, prefix, new_non_terminal)
 
         return new_transitions
 
     def _set_first(self) -> None:
-        self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in self._non_terminals}
-        for non_terminal in self._non_terminals:
+        self._first: Dict[str, Set[str]] = {non_terminal: set() for non_terminal in sorted(self._non_terminals)}
+        for non_terminal in sorted(self._non_terminals):
             self._set_first_of_non_terminal(non_terminal)
 
         return None

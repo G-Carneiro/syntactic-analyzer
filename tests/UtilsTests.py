@@ -4,6 +4,7 @@ import unittest
 
 
 class UtilsTests(unittest.TestCase):
+    # @unittest.skip("")
     def test_common_prefix_size(self) -> None:
         prefix1 = ('i', 'E', 't', 'S')
         prefix2 = ('i', 'E', 't', 'S', 'e', 'S')
@@ -24,6 +25,7 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_find_longest_prefix(self) -> None:
         productions = [('a',), ('i', 'E', 't', 'S', 'e', 'S'), ('i', 'E', 't', 'S')]
         expected = ('i', 'E', 't', 'S')
@@ -52,11 +54,12 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_add_factored_transition(self) -> None:
         new_transitions = {("S'", ('&',))}
         production = ('i', 'E', 't', 'S', 'e', 'S')
         prefix = ('i', 'E', 't', 'S')
-        non_terminal = "S"
+        new_non_terminal = "S'"
         new_transitions = {("S'", ('e', 'S')), ("S'", ('&',))}
 
         expected = {("S'", ('e', 'S')), ("S'", ('&',))}
@@ -64,11 +67,12 @@ class UtilsTests(unittest.TestCase):
             new_transitions,
             production,
             prefix,
-            non_terminal,
+            new_non_terminal,
         )
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_get_new_body(self) -> None:
         production = ('c', 'C')
         production_to_replace = ('A', 'C')
@@ -92,23 +96,27 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    # @unittest.skip("")
     def test_assemble_new_transition(self) -> None:
         non_terminal = "S"
+        new_non_terminal = "F"
         longest_commom_prefix = ('i', 'E', 't', 'S')
-        expected = (('S', ('i', 'E', 't', 'S', "S'")), "S'")
-        actual = assemble_new_transition(non_terminal, longest_commom_prefix)
+        expected = ('S', ('i', 'E', 't', 'S', "F"))
+        actual = assemble_new_transition(non_terminal, longest_commom_prefix, new_non_terminal)
         self.assertEqual(expected, actual)
 
         non_terminal = "C"
+        new_non_terminal = "F"
         longest_commom_prefix = ('e',)
-        expected = (('C', ('e', "C'")), "C'")
-        actual = assemble_new_transition(non_terminal, longest_commom_prefix)
+        expected = ('C', ('e', "F"))
+        actual = assemble_new_transition(non_terminal, longest_commom_prefix, new_non_terminal)
         self.assertEqual(expected, actual)
 
         non_terminal = "S"
+        new_non_terminal = "F"
         longest_commom_prefix = ('a',)
-        expected = (('S', ('a', "S'")), "S'")
-        actual = assemble_new_transition(non_terminal, longest_commom_prefix)
+        expected = ('S', ('a', "F"))
+        actual = assemble_new_transition(non_terminal, longest_commom_prefix, new_non_terminal)
         self.assertEqual(expected, actual)
         return None
 

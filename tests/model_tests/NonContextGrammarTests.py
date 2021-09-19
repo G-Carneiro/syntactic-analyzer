@@ -307,10 +307,10 @@ class NonContextGrammarTests(unittest.TestCase):
                         "E -> b"
         grammar = NonContextGrammar(grammar_input)
         expected = {
-            ("S", ("i", "E", "t", "S", "S'")),
+            ("S", ("i", "E", "t", "S", "F")),
             ("S", tuple("a")),
-            ("S'", ("e", "S")),
-            ("S'", tuple("&")),
+            ("F", ("e", "S")),
+            ("F", tuple("&")),
             ("E", tuple("b"))
         }
         grammar._remove_direct_non_determinism()
@@ -332,18 +332,18 @@ class NonContextGrammarTests(unittest.TestCase):
         grammar = NonContextGrammar(grammar_input)
         grammar._remove_direct_non_determinism()
         expected = {
-            ("S", ("a", "S'")),
+            ("S", ("a", "F")),
             ("S", ("c", "C", "C")),
             ("S", ("d", "D", "C")),
-            ("S'", ("D", "C")),
-            ("S'", ("B", "C")),
+            ("F", ("D", "C")),
+            ("F", ("B", "C")),
             ("A", ("a", "D")),
             ("A", ("c", "C")),
             ("B", ("a", "B")),
             ("B", ("d", "D")),
-            ("C", ("e", "C'")),
-            ("C'", tuple("C")),
-            ("C'", tuple("A")),
+            ("C", ("e", "E")),
+            ("E", tuple("C")),
+            ("E", tuple("A")),
             ("D", ("f", "D")),
             ("D", ("C", "B")),
         }
@@ -360,15 +360,15 @@ class NonContextGrammarTests(unittest.TestCase):
                         "E -> b"
         grammar = NonContextGrammar(grammar_input)
         expected = {
-            ("S", ("i", "E", "t", "S", "S'")),
+            ("S", ("i", "E", "t", "S", "F")),
             ("S", tuple("a")),
-            ("S'", ("e", "S")),
-            ("S'", tuple("&")),
+            ("F", ("e", "S")),
+            ("F", tuple("&")),
             ("E", tuple("b"))
         }
         grammar._left_factoring()
         actual = grammar.get_transitions()
-        self.assertEqual(actual, expected)
+        self.assertEqual(expected, actual)
 
         grammar_input = "S -> A C\n"\
                         "S -> B C\n"\
@@ -383,18 +383,18 @@ class NonContextGrammarTests(unittest.TestCase):
         grammar = NonContextGrammar(grammar_input)
         grammar._left_factoring()
         expected = {
-            ("S", ("a", "S'")),
+            ("S", ("a", "F")),
             ("S", ("c", "C", "C")),
             ("S", ("d", "D", "C")),
-            ("S'", ("D", "C")),
-            ("S'", ("B", "C")),
+            ("F", ("D", "C")),
+            ("F", ("B", "C")),
             ("A", ("a", "D")),
             ("A", ("c", "C")),
             ("B", ("a", "B")),
             ("B", ("d", "D")),
-            ("C", ("e", "C'")),
-            ("C'", tuple("C")),
-            ("C'", tuple("A")),
+            ("C", ("e", "E")),
+            ("E", tuple("C")),
+            ("E", tuple("A")),
             ("D", ("f", "D")),
             ("D", ("C", "B"))
         }

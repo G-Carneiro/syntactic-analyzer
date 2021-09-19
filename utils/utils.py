@@ -32,7 +32,7 @@ def common_prefix_size(prefix1: Tuple[str, ...], prefix2: Tuple[str, ...]) -> in
 def add_factored_transition(new_transitions: Set[Tuple[str, Tuple[str, ...]]],
                             production: Tuple[str, ...],
                             prefix: Tuple[str, ...],
-                            non_terminal: str
+                            new_non_terminal: str
                         ) -> Set[Tuple[str, Tuple[str, ...]]]:
     new_transition: List = list()
     prefix_size: int = len(prefix)
@@ -41,7 +41,7 @@ def add_factored_transition(new_transitions: Set[Tuple[str, Tuple[str, ...]]],
     if not(new_production):
         new_production = tuple("&")
 
-    new_transition.append(non_terminal + "'")
+    new_transition.append(new_non_terminal)
     new_transition.append(new_production)
     new_transition_tuple: Tuple = tuple(new_transition)
     new_transitions.add(new_transition_tuple)
@@ -61,14 +61,13 @@ def get_new_body(production: Tuple[str, ...],
     return new_body
 
 
-def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str, ...]) -> Tuple[Tuple[str, Tuple[str, ...]], str]:
+def assemble_new_transition(non_terminal: str, longest_commom_prefix: Tuple[str, ...], new_non_terminal: str) -> Tuple[str, Tuple[str, ...]]:
     temp_list: List[str] = list(longest_commom_prefix)
-    new_non_terminal: str = non_terminal + "'"
     temp_list.append(new_non_terminal)
     new_body: Tuple[str, ...] = tuple(temp_list)
     transition: Tuple[str, Tuple[str, ...]] = (non_terminal, new_body)
 
-    return transition, new_non_terminal
+    return transition
 
 
 def latex_analysis_table(non_terminals: Set[str], terminals: Set[str], analysis_table) -> None:
