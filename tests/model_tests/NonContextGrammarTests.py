@@ -33,6 +33,14 @@ class NonContextGrammarTests(unittest.TestCase):
 
         self.default_grammar2 = NonContextGrammar(grammar_input2)
 
+    def test_convert_grammar(self) -> None:
+        self.default_grammar0._eliminate_left_recursion()
+        self.default_grammar0._left_factoring()
+        self.default_grammar0._set_first()
+        print(self.default_grammar0.get_transitions())
+        # self.default_grammar0._set_follow()
+        return None
+
     # @unittest.skip("")
     def test_grammar_input(self) -> None:
         grammar_input: str = "P -> K V C \n" \

@@ -3,6 +3,8 @@ from typing import Dict
 from ..view.View import View
 from ..view.Form import Form
 
+from ..model.Grammar import NonContextGrammar
+
 class Controller:
     def __init__(self) -> None:
         self._view = View()
@@ -24,11 +26,14 @@ class Controller:
 
     def _handle_add_grammar_input_callback(self, response: Dict) -> None:
         try:
-            print(response)
+            grammar_input: str = response["text_entries"]["grammar_input"][0:-1]
+            grammar = NonContextGrammar(grammar_input)
         except:
             self._log("Algo deu errado ao adicionar a definição da gramática")
         else:
-            print("else")
+            # grammar.convert_grammar()
+            table = grammar.construct_analysis_table()
+            self._view.insert_text(idd="analysis_table", text=str(table))
         return None
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:

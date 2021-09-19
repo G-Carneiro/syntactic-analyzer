@@ -18,7 +18,7 @@ class NonContextGrammar:
         self._transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         self._set_grammar(grammar_input)
 
-    def _convert_grammar(self) -> None:
+    def convert_grammar(self) -> None:
         self._eliminate_left_recursion()
         self._left_factoring()
         self._set_first()
@@ -303,7 +303,7 @@ class NonContextGrammar:
                 table[state][terminal] = symbols
 
         # TODO: remove
-        latex_analysis_table(self._non_terminals, self._terminals - {"&"} | {"$"}, table)
+        # latex_analysis_table(self._non_terminals, self._terminals - {"&"} | {"$"}, table)
 
         return table
 
