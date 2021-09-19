@@ -18,6 +18,9 @@ class NonContextGrammar:
         self._transitions: Set[Tuple[str, Tuple[str, ...]]] = set()
         self._set_grammar(grammar_input)
 
+        # temp_states = self._non_terminals - {"S"}
+        # self._next_new_state = chr(ord(max(temp_states)) + 1)
+
     def convert_grammar(self) -> None:
         self._eliminate_left_recursion()
         self._left_factoring()

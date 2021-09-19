@@ -37,7 +37,7 @@ class NonContextGrammarTests(unittest.TestCase):
         self.default_grammar0._eliminate_left_recursion()
         self.default_grammar0._left_factoring()
         self.default_grammar0._set_first()
-        print(self.default_grammar0.get_transitions())
+        # print(self.default_grammar0.get_transitions())
         # self.default_grammar0._set_follow()
         return None
 
@@ -163,6 +163,23 @@ class NonContextGrammarTests(unittest.TestCase):
                            "C": {";", "e", "$"}
                            }
         self.assertEqual(self.default_grammar1.get_follow(), expected_follow)
+
+        # grammar_input = "S -> a S'\n"\
+                        # "S -> c C C\n"\
+                        # "S -> d D C\n"\
+                        # "S' -> D C\n"\
+                        # "S' -> B C\n"\
+                        # "A -> a D\n"\
+                        # "A -> c C\n"\
+                        # "B -> d D\n"\
+                        # "C -> e C'\n"\
+                        # "C' -> c\n"\
+                        # "C' -> A\n"\
+                        # "D -> f D\n"\
+                        # "D -> C B"
+        # grammar = NonContextGrammar(grammar_input)
+        # grammar._set_first()
+        # grammar._set_follow()
 
         return None
 
