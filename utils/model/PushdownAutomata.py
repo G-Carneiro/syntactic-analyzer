@@ -7,10 +7,11 @@ class PushDownAutomata:
                  analysis_table: Dict[str, Dict[str, Tuple[str, ...]]]) -> None:
         self._states: Set[str] = set(analysis_table.keys())
         self._initial_state: str = initial_state
-        self._stack: List[str] = ["$", initial_state]
+        self._stack: List[str] = list()
         self._analysis_table: Dict[str, Dict[str, Tuple[str, ...]]] = analysis_table
 
     def run(self, sentence: List[str]) -> bool:
+        self._stack = ["$", self._initial_state]
         sentence.append("$")
         while sentence:
             symbol = sentence[0]
