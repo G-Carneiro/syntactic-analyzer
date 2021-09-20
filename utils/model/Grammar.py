@@ -2,7 +2,7 @@ from copy import copy
 from typing import Dict, List, Set, Tuple, cast
 
 from utils.utils import (
-    latex_analysis_table,
+    should_replace,
     add_factored_transition,
     assemble_new_transition,
     find_longest_common_prefix,
@@ -22,8 +22,8 @@ class NonContextGrammar:
         self._next_new_state = chr(ord(max(temp_states)) + 1)
 
     def convert_grammar(self) -> None:
-        self._left_factoring()
         self._eliminate_left_recursion()
+        self._left_factoring()
         self._set_first()
         self._set_follow()
         return None
@@ -62,6 +62,17 @@ class NonContextGrammar:
     def get_follow(self) -> Dict[str, Set[str]]:
         return self._follow
 
+    def _get_new_non_terminal_name(self) -> str:
+        if self._next_new_state != "S":
+            new_state: str = self._next_new_state
+            self._next_new_state = chr(ord(self._next_new_state) + 1)
+        else:
+            self._next_new_state = chr(ord(self._next_new_state) + 1)
+            new_state: str = self._next_new_state
+            self._next_new_state = chr(ord(self._next_new_state) + 1)
+
+        return new_state
+
     def _eliminate_left_recursion(self) -> None:
         non_terminals: List[str] = list(sorted(self._non_terminals))
         for i in range(len(non_terminals)):
@@ -82,16 +93,7 @@ class NonContextGrammar:
 
     def _eliminate_immediate_left_recursion(self, state: str) -> None:
         if self.have_immediate_left_recursion(state):
-            # new_state: str = state + "\'"
-            if self._next_new_state != "S":
-                new_state: str = self._next_new_state
-                self._next_new_state = chr(ord(self._next_new_state) + 1)
-            else:
-                self._next_new_state = chr(ord(self._next_new_state) + 1)
-                new_state: str = self._next_new_state
-                self._next_new_state = chr(ord(self._next_new_state) + 1)
-
-            # print(f"new_non_terminal = {new_state}")
+            new_state = self._get_new_non_terminal_name()
             self._non_terminals.add(new_state)
             epsilon_production = (new_state, tuple("&"))
             self._transitions.add(epsilon_production)
@@ -124,12 +126,24 @@ class NonContextGrammar:
         return all_productions
 
     def _left_factoring(self) -> None:
-        # self._replace_indirect_with_direct_non_determinism()
+        self._replace_indirect_with_direct_non_determinism()
         self._remove_direct_non_determinism()
         return None
 
     def _replace_indirect_with_direct_non_determinism(self) -> None:
+        for non_terminal in sorted(self._non_terminals):
+            productions = self.get_all_productions_of_state(non_terminal)
+            for production in sorted(productions):
+                if production[0] in self._non_terminals:
+                    if should_replace(productions, self._non_terminals):
+                        # Substituir apenas se houver mais de uma transição começando com não terminal
+                        self._replace_indirect_nd_transitions(non_terminal, production[0])
+                        new_productions = self.get_all_productions_of_state(non_terminal)
+                        longest_commom_prefix = find_longest_common_prefix(sorted(list(new_productions)))
+                        if longest_commom_prefix:
+                            self._remove_direct_non_determinism()
         return None
+
 
     # def _replace_indirect_with_direct_non_determinism(self) -> None:
         # productions_with_same_terminals: Dict[str, Set] = self._get_productions_with_same_terminals()
@@ -189,18 +203,7 @@ class NonContextGrammar:
             longest_commom_prefix: Tuple[str] = find_longest_common_prefix(productions)
 
             if longest_commom_prefix and (longest_commom_prefix != tuple("&")):
-                print(f"longest_commom_prefix = {longest_commom_prefix}")
-
-                if self._next_new_state != "S":
-                    non_terminal_to_add: str = self._next_new_state
-                    self._next_new_state = chr(ord(self._next_new_state) + 1)
-                else:
-                    self._next_new_state = chr(ord(self._next_new_state) + 1)
-                    non_terminal_to_add: str = self._next_new_state
-                    self._next_new_state = chr(ord(self._next_new_state) + 1)
-
-                # print(f"{non_terminal}")
-                # print(f"non_terminal_to_add = {non_terminal_to_add}")
+                non_terminal_to_add = self._get_new_non_terminal_name()
                 transition_to_add = assemble_new_transition(non_terminal, longest_commom_prefix, non_terminal_to_add)
                 new_non_terminals_to_add.add(non_terminal_to_add)
                 self._transitions.add(transition_to_add)
@@ -316,7 +319,7 @@ class NonContextGrammar:
 
         return self._follow[non_terminal]
 
-    def construct_analysis_table(self) -> Dict[str, Dict[str, Tuple[str, Tuple[str, ...]]]]:
+    def construct_analysis_table(self) -> Dict[str, Dict[str, Tuple[str, ...]]]:
         productions = list(self._transitions)
         table = {non_terminal: {} for non_terminal in sorted(self._non_terminals)}
         for production in sorted(productions):
@@ -336,9 +339,6 @@ class NonContextGrammar:
             for terminal in sorted(first_of_alpha):
                 table[state][terminal] = symbols
 
-        # TODO: remove
-        # latex_analysis_table(self._non_terminals, self._terminals - {"&"} | {"$"}, table)
-
         return table
 
     def _get_first_of_production(self, production: Tuple) -> Set[str]:
@@ -355,6 +355,17 @@ class NonContextGrammar:
                 first.remove("&")
 
         return first
+
+    def is_ll1(self) -> bool:
+        for non_terminal in sorted(self._non_terminals):
+            productions = self.get_all_productions_of_state(non_terminal)
+            if tuple("&") in productions:
+                first = self._get_first_of_non_terminal(non_terminal)
+                follow = self._get_follow_of_non_terminal(non_terminal)
+                if first.intersection(follow):
+                    return False
+
+        return True
 
     def __repr__(self) -> str:
         output: str = ""

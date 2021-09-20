@@ -120,6 +120,18 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(expected, actual)
         return None
 
+    def test_should_replace(self) -> None:
+        non_terminals = {"A", "B", "C", "D", "Y", "Z"}
+        productions = {("f", "D"), ("C", "B")}
+        self.assertFalse(should_replace(productions, non_terminals))
+
+        productions = {("A", "C"), ("B", "C")}
+        self.assertTrue(should_replace(productions, non_terminals))
+
+        productions = {("A", "C"), ("C", "D"), ("Z", "Y")}
+        self.assertTrue(should_replace(productions, non_terminals))
+        return None
+
     @unittest.skip("")
     def test_latex_table(self) -> None:
         latex_analysis_table({"S", "A"}, {"a", "b"}, {})

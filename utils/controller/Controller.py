@@ -34,20 +34,24 @@ class Controller:
         except:
             self._log("Algo deu errado ao adicionar a definição da gramática")
         else:
-            self.grammar.convert_grammar()
-            table: Dict = self.grammar.construct_analysis_table()
-            table_repr = table_to_str(table, self.grammar.get_non_terminals(), self.grammar.get_terminals())
-            self._view.insert_text(idd="analysis_table", text=table_repr)
-            initial_state: str = self.grammar.get_initial_state()
-            self.pd_automata: PushDownAutomata = PushDownAutomata(initial_state, table)
-            self._log("Gramática Criada Com Sucesso")
+            try:
+                self.grammar.convert_grammar()
+                if self.grammar.is_ll1():
+                    table: Dict = self.grammar.construct_analysis_table()
+                    table_repr = table_to_str(table, self.grammar.get_non_terminals(), self.grammar.get_terminals())
+                    self._view.insert_text(idd="analysis_table", text=table_repr)
+                    initial_state: str = self.grammar.get_initial_state()
+                    self.pd_automata: PushDownAutomata = PushDownAutomata(initial_state, table)
+                    self._log("Gramática Criada Com Sucesso")
+                else:
+                    self._log("Não foi possível converter para LL(1)")
+            except:
+                    self._log("Algo deu errado")
         return None
 
     def _handle_add_token_input_callback(self, response: Dict) -> None:
         try:
             token_table = response["text_entries"]["token_input"].split()
-            # ["a", " ", "b", "\n"]
-            # print(token_table)
         except:
             self._log("Algo deu errado ao adicionar a tabela de tokens")
         else:
