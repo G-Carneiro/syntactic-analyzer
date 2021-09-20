@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+#
+.idea/
+*.aux
+*.synctex.gz
+
 # Distribution / packaging
 .Python
 build/
