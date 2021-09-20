@@ -136,6 +136,16 @@ def tuple_to_str(production: tuple) -> str:
 
     return output
 
+def should_replace(productions, non_terminals) -> bool:
+    sum_ = 0
+    for production in sorted(productions):
+        if production[0] in non_terminals:
+            sum_ += 1
+
+    if sum_ > 1:
+        return True
+    else:
+        return False
 
 def table_to_str(table: Dict[str, Dict[str, Tuple[str, ...]]],
                  non_terminals: Set[str],
