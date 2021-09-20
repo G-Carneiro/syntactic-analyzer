@@ -4,7 +4,8 @@
 
 ## Requisitos
 
-
+* Python 3.6 ou Superior
+* Tkinter
 
 ---
 
@@ -22,14 +23,10 @@ Para rodar o programa: `python3 main.py` na raíz do diretório.
     - Não terminais: S, A, B.
     - Terminais: a, b, c.
     ```
-    S -> S c
-    S -> A a
-    S -> c
-    A -> S a
-    A -> B b
+    S -> A B
     A -> a
-    B -> S c
-    B -> B b    
+    B -> b
+    B -> c  
     ```
 
 ---
